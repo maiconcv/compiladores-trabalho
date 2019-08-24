@@ -1,0 +1,6 @@
+
+int x = 1;
+int opa;
+int int1 = 5.6;
+
+
