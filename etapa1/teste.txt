@@ -1,6 +1,7 @@
-
 int x = 1;
-int opa;
-int int1 = 5.6;
+long opa;
+float f = 5.6;
 
+for(x = 0; x < 5; x++)
+	opa += x;
 
