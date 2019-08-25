@@ -31,6 +31,7 @@ int main(){
 			case LIT_FALSE: fprintf(stderr, "Literal False.\n"); break;
 			case LIT_CHAR: fprintf(stderr, "Literal Char.\n"); break;
 			case LIT_STRING: fprintf(stderr, "Literal String.\n"); break;
+			case TOKEN_ERROR: fprintf(stderr, "Token error.\n"); break;
 			default: fprintf(stderr, "Token ascii %c\n", tok); break;
 		}	
 	}

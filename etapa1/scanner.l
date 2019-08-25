@@ -35,18 +35,21 @@ DIGIT [0-9]
 "=="				return OPERATOR_EQ;
 "!="				return OPERATOR_DIF;
 
+{DIGIT}+			{ hashInsert(yytext); return LIT_INTEGER; }
+{DIGIT}+"."{DIGIT}+		{ hashInsert(yytext); return LIT_FLOAT; }
+"TRUE"				{ hashInsert(yytext); return LIT_TRUE; }
+"FALSE"				{ hashInsert(yytext); return LIT_FALSE; }
+\'.\'				{ hashInsert(yytext); return LIT_CHAR; }
+\"([^\"])*\"			{ hashInsert(yytext); return LIT_STRING; }
+
 [A-Za-z_][A-Za-z_0-9]*		{ hashInsert(yytext); return TK_IDENTIFIER; }
 
-{DIGIT}+			{ return LIT_INTEGER; }
-{DIGIT}+"."{DIGIT}+		{ return LIT_FLOAT; }
-"true"				return LIT_TRUE;
-"false"				return LIT_FALSE;
-
-[-+*/();]			return yytext[0];
-[\t]
+[,;:()\[\]{}+\-*/<>=v.~&$#]	return yytext[0];
+[ \t]
 "\n"				lineNumber++;
 "//".*
-.
+.				return TOKEN_ERROR;
+
 "/*"				BEGIN(COMMENT);
 <COMMENT>"*/"			BEGIN(INITIAL);
 <COMMENT>"\n"			lineNumber++;
