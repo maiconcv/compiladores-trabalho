@@ -52,8 +52,8 @@ DIGIT [0-9]
 "//".*
 .				return TOKEN_ERROR;
 
-"/*"				BEGIN(COMMENT);
-<COMMENT>"*/"			BEGIN(INITIAL);
+"###"				BEGIN(COMMENT);
+<COMMENT>"###"			BEGIN(INITIAL);
 <COMMENT>"\n"			lineNumber++;
 <COMMENT>. 
 

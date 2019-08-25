@@ -5,9 +5,9 @@ float f = 5.6;
 'c'
 TRUE
 // comentario de uma linha
-/* comentario
+### comentario
 de multiplas
-linhas */
+linhas ###
 if FALSE then 0 else 1;
 5.
 .5
