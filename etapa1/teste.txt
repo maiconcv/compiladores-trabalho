@@ -16,3 +16,4 @@ if FALSE then 0 else 1;
 "string dividida
 em mais de
 uma linha"
+while(TRUE){}
