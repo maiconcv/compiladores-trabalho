@@ -12,3 +12,7 @@ if FALSE then 0 else 1;
 5.
 .5
 "string com aspas duplas \" no meio"
+"string com barra n \n no meio"
+"string dividida
+em mais de
+uma linha"

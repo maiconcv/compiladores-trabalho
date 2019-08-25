@@ -37,10 +37,12 @@ DIGIT [0-9]
 
 {DIGIT}+			{ hashInsert(yytext); return LIT_INTEGER; }
 {DIGIT}+"."{DIGIT}+		{ hashInsert(yytext); return LIT_FLOAT; }
+"."{DIGIT}+			{ hashInsert(yytext); return LIT_FLOAT; }
+{DIGIT}+"."			{ hashInsert(yytext); return LIT_FLOAT; }
 "TRUE"				{ hashInsert(yytext); return LIT_TRUE; }
 "FALSE"				{ hashInsert(yytext); return LIT_FALSE; }
 \'.\'				{ hashInsert(yytext); return LIT_CHAR; }
-\"([^\"])*\"			{ hashInsert(yytext); return LIT_STRING; }
+\"(\\.|[^"])*\"			{ hashInsert(yytext); return LIT_STRING; }
 
 [A-Za-z_][A-Za-z_0-9]*		{ hashInsert(yytext); return TK_IDENTIFIER; }
 
