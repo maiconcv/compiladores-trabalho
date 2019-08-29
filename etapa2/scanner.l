@@ -44,9 +44,10 @@ DIGIT [0-9]
 \'.\'				{ hashInsert(yytext); return LIT_CHAR; }
 \"(\\.|[^"])*\"			{ hashInsert(yytext); return LIT_STRING; }
 
+[,;:()\[\]{}+\-*/<>=v.~&$#]	return yytext[0];
+
 [A-Za-z_][A-Za-z_0-9]*		{ hashInsert(yytext); return TK_IDENTIFIER; }
 
-[,;:()\[\]{}+\-*/<>=v.~&$#]	return yytext[0];
 [ \t]
 "\n"				lineNumber++;
 "//".*
