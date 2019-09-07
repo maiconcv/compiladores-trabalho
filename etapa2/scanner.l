@@ -80,5 +80,6 @@ int getLineNumber(void){
 	return lineNumber;
 }
 
+#include "y.tab.c"
 #include "main.c"
 
