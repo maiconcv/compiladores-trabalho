@@ -48,16 +48,30 @@ programa: programa decl
 	|
 	;
 
-decl: vardec | fundec
+decl: vardec | fundec | vetdec
 	;
 
-vardec: KW_INT TK_IDENTIFIER '=' init ';'
+vardec: type TK_IDENTIFIER '=' init ';'
 	;
 
-init: LIT_INTEGER
+type: KW_BYTE | KW_INT | KW_LONG | KW_FLOAT | KW_BOOL
 	;
 
-fundec: KW_INT TK_IDENTIFIER '(' parlist ')' cmd
+init: LIT_INTEGER | LIT_FLOAT | LIT_TRUE | LIT_FALSE | LIT_CHAR | LIT_STRING
+	;
+
+fundec: type TK_IDENTIFIER '(' parlist ')' cmd
+	;
+
+vetdec: type TK_IDENTIFIER '[' LIT_INTEGER ']' vetatrib ';'
+	;
+
+vetatrib: ':' lstinit
+	|
+	;
+
+lstinit: init lstinit
+	|
 	;
 
 parlist: par rest
@@ -68,10 +82,10 @@ rest: ',' par rest
 	|
 	;
 
-par: KW_INT
+par: type TK_IDENTIFIER
 	;
 
-cmd: TK_IDENTIFIER '=' LIT_FLOAT
+cmd: TK_IDENTIFIER '=' init
 	| block
 	;
 
