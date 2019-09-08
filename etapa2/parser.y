@@ -85,8 +85,38 @@ rest: ',' par rest
 par: type TK_IDENTIFIER
 	;
 
-cmd: TK_IDENTIFIER '=' init
+cmd: TK_IDENTIFIER isvet '=' exp
 	| block
+	;
+
+exp: exp opcomp exp | opsingle exp | leaf | '(' exp ')'
+	;
+
+opcomp: '+' | '-' | '*' | '/' | '<' | '>' | '.' | 'v' | OPERATOR_LE | OPERATOR_GE | OPERATOR_EQ | OPERATOR_DIF
+	;
+
+opsingle: '~'
+	;
+
+leaf: TK_IDENTIFIER isvet | init | TK_IDENTIFIER '(' arglist ')'
+	;
+
+isvet: '[' vetindex ']'
+	|
+	;
+
+vetindex: TK_IDENTIFIER | LIT_INTEGER
+	;
+
+arglist: arg argrest
+	|
+	;
+
+argrest: ',' arg argrest
+	|
+	;
+
+arg: TK_IDENTIFIER
 	;
 
 block: '{' lcmd '}'
@@ -101,6 +131,6 @@ lcmd: lcmd cmd ';'
 
 
 void yyerror(char* msg){
-	fprintf(stderr, "Erro de sintaxe na linha %d!\n", lineNumber);
+	fprintf(stderr, "Erro de sintaxe na linha %d!\n", getLineNumber());
 	exit(3);
 }
