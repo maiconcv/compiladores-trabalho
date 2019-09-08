@@ -28,7 +28,7 @@ int main ()
 
   for (l:1,10,1)
     print ".";
-  printf "\n";
+  print "\n";
 
   if (a==15) then 
     print "A=15\n";
