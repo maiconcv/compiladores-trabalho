@@ -86,7 +86,30 @@ param: type TK_IDENTIFIER
 	;
 
 cmd: TK_IDENTIFIER isvect '=' exp
+	| TK_IDENTIFIER '=' exp
+	| KW_READ TK_IDENTIFIER
+	| KW_PRINT printarglist
+	| KW_RETURN exp
+	| KW_IF '(' exp ')' KW_THEN cmd haselse
+	| KW_WHILE '(' exp ')' cmd
+	| KW_BREAK
+	| KW_FOR '(' TK_IDENTIFIER ':' exp ',' exp ',' exp ')' cmd
 	| block
+	;
+
+haselse: KW_ELSE cmd
+	|
+	;
+
+printarglist: exp printargrest
+	;
+
+printargrest: printargsep exp printargrest
+	|
+	;
+
+printargsep: ','
+	|
 	;
 
 exp: exp opcomp exp | opsingle exp | leaf | '(' exp ')'
@@ -116,7 +139,7 @@ argrest: ',' arg argrest
 	|
 	;
 
-arg: TK_IDENTIFIER
+arg: exp
 	;
 
 block: '{' lcmd '}'
