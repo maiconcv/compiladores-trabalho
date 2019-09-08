@@ -48,10 +48,10 @@ programa: programa decl
 	|
 	;
 
-decl: vardec | fundec | vetdec
+decl: vardecl | fundecl | vectdecl
 	;
 
-vardec: type TK_IDENTIFIER '=' init ';'
+vardecl: type TK_IDENTIFIER '=' init ';'
 	;
 
 type: KW_BYTE | KW_INT | KW_LONG | KW_FLOAT | KW_BOOL
@@ -60,13 +60,13 @@ type: KW_BYTE | KW_INT | KW_LONG | KW_FLOAT | KW_BOOL
 init: LIT_INTEGER | LIT_FLOAT | LIT_TRUE | LIT_FALSE | LIT_CHAR | LIT_STRING
 	;
 
-fundec: type TK_IDENTIFIER '(' parlist ')' cmd
+fundecl: type TK_IDENTIFIER '(' paramlist ')' cmd
 	;
 
-vetdec: type TK_IDENTIFIER '[' LIT_INTEGER ']' vetatrib ';'
+vectdecl: type TK_IDENTIFIER '[' LIT_INTEGER ']' vectatrib ';'
 	;
 
-vetatrib: ':' lstinit
+vectatrib: ':' lstinit
 	|
 	;
 
@@ -74,18 +74,18 @@ lstinit: init lstinit
 	|
 	;
 
-parlist: par rest
+paramlist: param paramrest
 	|
 	;
 
-rest: ',' par rest
+paramrest: ',' param paramrest
 	|
 	;
 
-par: type TK_IDENTIFIER
+param: type TK_IDENTIFIER
 	;
 
-cmd: TK_IDENTIFIER isvet '=' exp
+cmd: TK_IDENTIFIER isvect '=' exp
 	| block
 	;
 
@@ -98,14 +98,14 @@ opcomp: '+' | '-' | '*' | '/' | '<' | '>' | '.' | 'v' | OPERATOR_LE | OPERATOR_G
 opsingle: '~'
 	;
 
-leaf: TK_IDENTIFIER isvet | init | TK_IDENTIFIER '(' arglist ')'
+leaf: TK_IDENTIFIER isvect | init | TK_IDENTIFIER '(' arglist ')'
 	;
 
-isvet: '[' vetindex ']'
+isvect: '[' vectindex ']'
 	|
 	;
 
-vetindex: TK_IDENTIFIER | LIT_INTEGER
+vectindex: TK_IDENTIFIER | LIT_INTEGER
 	;
 
 arglist: arg argrest
