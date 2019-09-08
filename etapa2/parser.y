@@ -145,7 +145,7 @@ arg: exp
 block: '{' lcmd '}'
 	;
 
-lcmd: lcmd cmd ';'
+lcmd: cmd ';' lcmd | cmd
 	|
 	;
 
