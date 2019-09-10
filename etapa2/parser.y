@@ -112,34 +112,36 @@ printargsep: ','
 	|
 	;
 
-exp: exp opcomp exp | opsingle exp | leaf | '(' exp ')'
-	;
-
-opcomp: '+' | '-' | '*' | '/' | '<' | '>' | '.' | 'v' | OPERATOR_LE | OPERATOR_GE | OPERATOR_EQ | OPERATOR_DIF
-	;
-
-opsingle: '~'
+exp: exp '+' exp
+	| exp '-' exp
+	| exp '*' exp
+	| exp '/' exp
+	| exp '<' exp
+	| exp '>' exp
+	| exp '.' exp
+	| exp 'v' exp
+	| exp OPERATOR_LE exp
+	| exp OPERATOR_GE exp
+	| exp OPERATOR_EQ exp
+	| exp OPERATOR_DIF exp
+	| '~' exp
+	| leaf
+	| '(' exp ')'
 	;
 
 leaf: TK_IDENTIFIER isvect | init | TK_IDENTIFIER '(' arglist ')'
 	;
 
-isvect: '[' vectindex ']'
+isvect: '[' exp ']'
 	|
 	;
 
-vectindex: TK_IDENTIFIER | LIT_INTEGER
-	;
-
-arglist: arg argrest
+arglist: exp argrest
 	|
 	;
 
-argrest: ',' arg argrest
+argrest: ',' exp argrest
 	|
-	;
-
-arg: exp
 	;
 
 block: '{' lcmd '}'
@@ -153,7 +155,7 @@ lcmd: cmd ';' lcmd | cmd
 
 
 
-void yyerror(char* msg){
+int yyerror(const char* msg){
 	fprintf(stderr, "Erro de sintaxe na linha %d!\n", getLineNumber());
 	exit(3);
 }
