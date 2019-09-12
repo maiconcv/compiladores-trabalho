@@ -17,7 +17,7 @@ int hashAddress(char* text){
 }
 
 HASH_NODE* hashFind(char* text){
-
+	return NULL;
 }
 
 HASH_NODE* hashInsert(char* text){

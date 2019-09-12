@@ -1,6 +1,12 @@
-int main(int argc, char** argv){
-	int tok;
+#include <stdio.h>
+#include <stdlib.h>
+#include "hash.h"
 
+void initMe(void);
+int yyparse();
+extern FILE* yyin;
+
+int main(int argc, char** argv){
 	initMe();
 
 	if(argc < 2){

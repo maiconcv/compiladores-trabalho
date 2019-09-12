@@ -3,10 +3,19 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "hash.h"
 
 int yyerror(const char* msg);
+int getLineNumber(void);
+int yylex();
 
 %}
+
+
+%union{
+	int valor;
+}
+
 
 %token KW_BYTE
 %token KW_INT
@@ -31,7 +40,7 @@ int yyerror(const char* msg);
 
 %token TK_IDENTIFIER
 
-%token LIT_INTEGER
+%token<valor> LIT_INTEGER
 %token LIT_FLOAT
 %token LIT_TRUE
 %token LIT_FALSE
@@ -41,6 +50,7 @@ int yyerror(const char* msg);
 %token TOKEN_ERROR
 
 
+%type<valor> exp
 
 %%
 
@@ -59,7 +69,8 @@ vardecl: type TK_IDENTIFIER '=' init ';'
 type: KW_BYTE | KW_INT | KW_LONG | KW_FLOAT | KW_BOOL
 	;
 
-init: LIT_INTEGER | LIT_FLOAT | LIT_TRUE | LIT_FALSE | LIT_CHAR | LIT_STRING
+init: LIT_INTEGER 				{ fprintf(stderr, "exp = %d\n", $1); }
+	| LIT_FLOAT | LIT_TRUE | LIT_FALSE | LIT_CHAR | LIT_STRING
 	;
 
 fundecl: type TK_IDENTIFIER '(' paramlist ')' cmd

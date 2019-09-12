@@ -1,5 +1,5 @@
 #
-# UFRGS - Compiladores B - Marcelo Johann - 2009/2 - Etapa 2
+# UFRGS - Compiladores B - Marcelo Johann - 2009/2 - Etapa 3
 #
 # Makefile for single compiler call
 # All source files must be included from code embedded in scanner.l
@@ -7,12 +7,26 @@
 # and #include "main.c" in the last part of the scanner.l
 #
 
-etapa2: lex.yy.c
-	gcc -o etapa2 lex.yy.c
+etapa3: y.tab.o lex.yy.o main.o hash.o
+	gcc -o etapa3 y.tab.o lex.yy.o main.o hash.o -Wall
+
+y.tab.o: y.tab.c
+	gcc -c y.tab.c -Wall
+
+lex.yy.o: lex.yy.c
+	gcc -c lex.yy.c
+
+main.o: main.c
+	gcc -c main.c -Wall
+
+hash.o: hash.c
+	gcc -c hash.c -Wall
+
 lex.yy.c: scanner.l
-	lex scanner.l
-scanner.l: parser.y
+	lex --header-file=lex.yy.h scanner.l
+
+y.tab.c: parser.y
 	yacc parser.y -d
 
 clean:
-	rm y.tab.* lex.yy.c etapa2
+	rm  *.o y.tab.h y.tab.c lex.yy.h lex.yy.c etapa3

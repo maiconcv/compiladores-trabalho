@@ -2,7 +2,7 @@
 %{
 
 #include "y.tab.h"
-#include "hash.c"
+#include "hash.h"
 
 int lineNumber = 1;
 
@@ -35,7 +35,7 @@ DIGIT [0-9]
 "=="				return OPERATOR_EQ;
 "!="				return OPERATOR_DIF;
 
-{DIGIT}+			{ hashInsert(yytext); return LIT_INTEGER; }
+{DIGIT}+			{ hashInsert(yytext); yylval.valor = atoi(yytext); return LIT_INTEGER; }
 {DIGIT}+"."{DIGIT}+		{ hashInsert(yytext); return LIT_FLOAT; }
 "."{DIGIT}+			{ hashInsert(yytext); return LIT_FLOAT; }
 {DIGIT}+"."			{ hashInsert(yytext); return LIT_FLOAT; }
@@ -79,7 +79,4 @@ int isRunning(void){
 int getLineNumber(void){
 	return lineNumber;
 }
-
-#include "y.tab.c"
-#include "main.c"
 
