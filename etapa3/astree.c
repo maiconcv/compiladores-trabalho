@@ -15,6 +15,9 @@ AST* astreeCreate(int type, HASH_NODE* symbol, AST* s0, AST* s1, AST* s2, AST* s
 void astreePrint(AST* node, int level){
 	if(!node)
 		return;
+
+	for(int i = 0; i < level; i++)
+		fprintf(stderr, "  ");
 	fprintf(stderr, "AST(");
 	switch(node->type){
 		case AST_SYMBOL:
@@ -27,6 +30,6 @@ void astreePrint(AST* node, int level){
 	}
 	
 	for(int i = 0; i < MAX_SONS; ++i)
-		// missing info
+		astreePrint(node->son[i], level + 1);
 }
 
