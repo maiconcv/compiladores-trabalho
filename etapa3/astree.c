@@ -1,6 +1,6 @@
 #include "astree.h"
 
-AST* astreeCreate(int type, HASH_NODE* symbol, AST* s0, AST* s1, AST* s2, AST* s3){
+AST* astCreate(int type, HASH_NODE* symbol, AST* s0, AST* s1, AST* s2, AST* s3){
 	AST* newnode = 0;
 	newnode = (AST*)calloc(1, sizeof(AST));
 	newnode->type = type;
@@ -12,7 +12,7 @@ AST* astreeCreate(int type, HASH_NODE* symbol, AST* s0, AST* s1, AST* s2, AST* s
 	return newnode;
 }
 
-void astreePrint(AST* node, int level){
+void astPrint(AST* node, int level){
 	if(!node)
 		return;
 
@@ -30,6 +30,6 @@ void astreePrint(AST* node, int level){
 	}
 	
 	for(int i = 0; i < MAX_SONS; ++i)
-		astreePrint(node->son[i], level + 1);
+		astPrint(node->son[i], level + 1);
 }
 

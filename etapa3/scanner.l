@@ -37,9 +37,9 @@ DIGIT [0-9]
 "!="				return OPERATOR_DIF;
 
 {DIGIT}+			{ yylval.symbol = hashInsert(yytext); return LIT_INTEGER; }
-{DIGIT}+"."{DIGIT}+		{ hashInsert(yytext); return LIT_FLOAT; }
-"."{DIGIT}+			{ hashInsert(yytext); return LIT_FLOAT; }
-{DIGIT}+"."			{ hashInsert(yytext); return LIT_FLOAT; }
+{DIGIT}+"."{DIGIT}+		{ yylval.symbol = hashInsert(yytext); return LIT_FLOAT; }
+"."{DIGIT}+			{ yylval.symbol = hashInsert(yytext); return LIT_FLOAT; }
+{DIGIT}+"."			{ yylval.symbol = hashInsert(yytext); return LIT_FLOAT; }
 "TRUE"				{ hashInsert(yytext); return LIT_TRUE; }
 "FALSE"				{ hashInsert(yytext); return LIT_FALSE; }
 \'.\'				{ hashInsert(yytext); return LIT_CHAR; }
@@ -47,7 +47,7 @@ DIGIT [0-9]
 
 [,;:()\[\]{}+\-*/<>=v.~&$#]	return yytext[0];
 
-[A-Za-z_][A-Za-z_0-9]*		{ hashInsert(yytext); return TK_IDENTIFIER; }
+[A-Za-z_][A-Za-z_0-9]*		{ yylval.symbol = hashInsert(yytext); return TK_IDENTIFIER; }
 
 [ \t]
 "\n"				lineNumber++;

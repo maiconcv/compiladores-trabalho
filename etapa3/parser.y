@@ -41,10 +41,10 @@ int getLineNumber(void);
 %token OPERATOR_EQ
 %token OPERATOR_DIF
 
-%token TK_IDENTIFIER
+%token<symbol> TK_IDENTIFIER
 
 %token<symbol> LIT_INTEGER
-%token LIT_FLOAT
+%token<symbol> LIT_FLOAT
 %token LIT_TRUE
 %token LIT_FALSE
 %token LIT_CHAR
@@ -127,13 +127,13 @@ printargsep: ','
 	|
 	;
 
-exp: LIT_INTEGER 			{ /*fprintf(stderr, "exp: %s\n", $1->text);*/ }
-	| LIT_FLOAT			{  }
-	| LIT_TRUE			{  }
+exp: LIT_INTEGER 			{ fprintf(stderr, "exp: %s\n", $1->text); }
+	| LIT_FLOAT			{ fprintf(stderr, "exp: %s\n", $1->text); }
+	| LIT_TRUE			{ $$ = 0; }
 	| LIT_FALSE			{  }
 	| LIT_CHAR			{  }
 	| LIT_STRING			{  }
-	| TK_IDENTIFIER isvect		{  }
+	| TK_IDENTIFIER isvect		{ fprintf(stderr, "exp: %s\n", $1->text); }
 	| TK_IDENTIFIER '(' arglist ')'
 	| exp '+' exp
 	| exp '-' exp
