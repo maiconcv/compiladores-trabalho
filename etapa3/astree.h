@@ -1,3 +1,6 @@
+#ifndef COMP_ASTREE_H
+#define COMP_ASTREE_H
+
 #include <stdio.h>
 #include "hash.h"
 
@@ -15,3 +18,4 @@ typedef struct astree_node{
 AST* astreeCreate(int type, HASH_NODE* symbol, AST* s0, AST* s1, AST* s2, AST* s3);
 void astreePrint(AST* node, int level);
 
+#endif // COMP_ASTREE_H

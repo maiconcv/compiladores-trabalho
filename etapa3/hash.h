@@ -1,3 +1,6 @@
+#ifndef COMP_HASH_H
+#define COMP_HASH_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,3 +19,4 @@ HASH_NODE* hashFind(char* text);
 HASH_NODE* hashInsert(char* text);
 void hashPrint(void);
 
+#endif // COMP_HASH_H

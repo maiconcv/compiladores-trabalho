@@ -3,17 +3,20 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "lex.yy.h"
 #include "hash.h"
+#include "astree.h"
 
 int yyerror(const char* msg);
 int getLineNumber(void);
-int yylex();
+//int yylex();
 
 %}
 
 
 %union{
-	int valor;
+	HASH_NODE* symbol;
+	AST* ast;
 }
 
 
@@ -40,7 +43,7 @@ int yylex();
 
 %token TK_IDENTIFIER
 
-%token<valor> LIT_INTEGER
+%token<symbol> LIT_INTEGER
 %token LIT_FLOAT
 %token LIT_TRUE
 %token LIT_FALSE
@@ -50,7 +53,7 @@ int yylex();
 %token TOKEN_ERROR
 
 
-%type<valor> exp
+%type<ast> exp
 
 %%
 
@@ -69,8 +72,7 @@ vardecl: type TK_IDENTIFIER '=' init ';'
 type: KW_BYTE | KW_INT | KW_LONG | KW_FLOAT | KW_BOOL
 	;
 
-init: LIT_INTEGER 				{ fprintf(stderr, "exp = %d\n", $1); }
-	| LIT_FLOAT | LIT_TRUE | LIT_FALSE | LIT_CHAR | LIT_STRING
+init: LIT_INTEGER | LIT_FLOAT | LIT_TRUE | LIT_FALSE | LIT_CHAR | LIT_STRING
 	;
 
 fundecl: type TK_IDENTIFIER '(' paramlist ')' cmd
@@ -125,7 +127,15 @@ printargsep: ','
 	|
 	;
 
-exp: exp '+' exp
+exp: LIT_INTEGER 			{ /*fprintf(stderr, "exp: %s\n", $1->text);*/ }
+	| LIT_FLOAT			{  }
+	| LIT_TRUE			{  }
+	| LIT_FALSE			{  }
+	| LIT_CHAR			{  }
+	| LIT_STRING			{  }
+	| TK_IDENTIFIER isvect		{  }
+	| TK_IDENTIFIER '(' arglist ')'
+	| exp '+' exp
 	| exp '-' exp
 	| exp '*' exp
 	| exp '/' exp
@@ -138,11 +148,7 @@ exp: exp '+' exp
 	| exp OPERATOR_EQ exp
 	| exp OPERATOR_DIF exp
 	| '~' exp
-	| leaf
 	| '(' exp ')'
-	;
-
-leaf: TK_IDENTIFIER isvect | init | TK_IDENTIFIER '(' arglist ')'
 	;
 
 isvect: '[' exp ']'
