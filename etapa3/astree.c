@@ -28,6 +28,11 @@ void astPrint(AST* node, int level){
 			break;
 		default: break;	
 	}
+
+	if(node->symbol)
+		fprintf(stderr, "%s,\n", node->symbol->text);
+	else
+		fprintf(stderr, """,\n");
 	
 	for(int i = 0; i < MAX_SONS; ++i)
 		astPrint(node->son[i], level + 1);

@@ -100,8 +100,8 @@ paramrest: ',' param paramrest
 param: type TK_IDENTIFIER
 	;
 
-cmd: TK_IDENTIFIER isvect '=' exp
-	| TK_IDENTIFIER '=' exp
+cmd: TK_IDENTIFIER '=' exp	{ astPrint($3, 0); }
+	| TK_IDENTIFIER '[' exp ']' '=' exp
 	| KW_READ TK_IDENTIFIER
 	| KW_PRINT printarglist
 	| KW_RETURN exp
@@ -127,15 +127,16 @@ printargsep: ','
 	|
 	;
 
-exp: LIT_INTEGER 			{ fprintf(stderr, "exp: %s\n", $1->text); }
-	| LIT_FLOAT			{ fprintf(stderr, "exp: %s\n", $1->text); }
+exp: LIT_INTEGER 			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
+	| LIT_FLOAT			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
 	| LIT_TRUE			{ $$ = 0; }
-	| LIT_FALSE			{  }
-	| LIT_CHAR			{  }
-	| LIT_STRING			{  }
-	| TK_IDENTIFIER isvect		{ fprintf(stderr, "exp: %s\n", $1->text); }
-	| TK_IDENTIFIER '(' arglist ')'
-	| exp '+' exp
+	| LIT_FALSE			{ $$ = 0; }
+	| LIT_CHAR			{ $$ = 0; }
+	| LIT_STRING			{ $$ = 0; }
+	| TK_IDENTIFIER			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
+	| TK_IDENTIFIER '[' exp ']'	{ $$ = 0; }
+	| TK_IDENTIFIER '(' arglist ')' { $$ = 0; }
+	| exp '+' exp			{ $$ = astCreate(AST_ADD, 0, $1, $3, 0, 0); }
 	| exp '-' exp
 	| exp '*' exp
 	| exp '/' exp
@@ -147,12 +148,8 @@ exp: LIT_INTEGER 			{ fprintf(stderr, "exp: %s\n", $1->text); }
 	| exp OPERATOR_GE exp
 	| exp OPERATOR_EQ exp
 	| exp OPERATOR_DIF exp
-	| '~' exp
-	| '(' exp ')'
-	;
-
-isvect: '[' exp ']'
-	|
+	| '~' exp			{ $$ = 0; }
+	| '(' exp ')'			{ $$ = 0; }
 	;
 
 arglist: exp argrest
