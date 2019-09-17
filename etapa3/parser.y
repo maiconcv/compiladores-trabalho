@@ -110,6 +110,7 @@ cmd: TK_IDENTIFIER '=' exp	{ astPrint($3, 0); }
 	| KW_BREAK
 	| KW_FOR '(' TK_IDENTIFIER ':' exp ',' exp ',' exp ')' cmd
 	| block
+	|
 	;
 
 haselse: KW_ELSE cmd
@@ -163,8 +164,8 @@ argrest: ',' exp argrest
 block: '{' lcmd '}'
 	;
 
-lcmd: cmd ';' lcmd | cmd
-	|
+lcmd: cmd ';' lcmd
+	| cmd
 	;
 
 %%

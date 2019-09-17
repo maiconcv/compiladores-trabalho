@@ -10,3 +10,6 @@ y = 78+2+x+y;
 int funcaodois()
 k=6.66
 
+int funcvazia() {    }
+
+int funccmdvaz() {  ; ;  ; }
