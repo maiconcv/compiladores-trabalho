@@ -20,12 +20,19 @@ void astPrint(AST* node, int level){
 		fprintf(stderr, "  ");
 	fprintf(stderr, "AST(");
 	switch(node->type){
-		case AST_SYMBOL:
-			fprintf(stderr, "AST_SYMBOL,");
-			break;
-		case AST_ADD:
-			fprintf(stderr, "AST_ADD,");
-			break;
+		case AST_SYMBOL: fprintf(stderr, "AST_SYMBOL,"); break;
+		case AST_ADD: fprintf(stderr, "AST_ADD,"); break;
+		case AST_SUB: fprintf(stderr, "AST_SUB,"); break;
+		case AST_MUL: fprintf(stderr, "AST_MUL,"); break;
+		case AST_DIV: fprintf(stderr, "AST_DIV,"); break;
+		case AST_LT: fprintf(stderr, "AST_LT,"); break;
+		case AST_GT: fprintf(stderr, "AST_GT,"); break;
+		case AST_AND: fprintf(stderr, "AST_AND,"); break;
+		case AST_OR: fprintf(stderr, "AST_OR,"); break;
+		case AST_LE: fprintf(stderr, "AST_LE,"); break;
+		case AST_GE: fprintf(stderr, "AST_GE,"); break;
+		case AST_EQ: fprintf(stderr, "AST_EQ,"); break;
+		case AST_DIF: fprintf(stderr, "AST_DIF,"); break;
 		default: break;	
 	}
 

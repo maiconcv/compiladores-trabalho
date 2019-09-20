@@ -45,10 +45,10 @@ int getLineNumber(void);
 
 %token<symbol> LIT_INTEGER
 %token<symbol> LIT_FLOAT
-%token LIT_TRUE
-%token LIT_FALSE
-%token LIT_CHAR
-%token LIT_STRING
+%token<symbol> LIT_TRUE
+%token<symbol> LIT_FALSE
+%token<symbol> LIT_CHAR
+%token<symbol> LIT_STRING
 
 %token TOKEN_ERROR
 
@@ -130,25 +130,25 @@ printargsep: ','
 
 exp: LIT_INTEGER 			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
 	| LIT_FLOAT			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
-	| LIT_TRUE			{ $$ = 0; }
-	| LIT_FALSE			{ $$ = 0; }
-	| LIT_CHAR			{ $$ = 0; }
-	| LIT_STRING			{ $$ = 0; }
+	| LIT_TRUE			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
+	| LIT_FALSE			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
+	| LIT_CHAR			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
+	| LIT_STRING			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
 	| TK_IDENTIFIER			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
 	| TK_IDENTIFIER '[' exp ']'	{ $$ = 0; }
 	| TK_IDENTIFIER '(' arglist ')' { $$ = 0; }
 	| exp '+' exp			{ $$ = astCreate(AST_ADD, 0, $1, $3, 0, 0); }
-	| exp '-' exp
-	| exp '*' exp
-	| exp '/' exp
-	| exp '<' exp
-	| exp '>' exp
-	| exp '.' exp
-	| exp 'v' exp
-	| exp OPERATOR_LE exp
-	| exp OPERATOR_GE exp
-	| exp OPERATOR_EQ exp
-	| exp OPERATOR_DIF exp
+	| exp '-' exp			{ $$ = astCreate(AST_SUB, 0, $1, $3, 0, 0); }
+	| exp '*' exp			{ $$ = astCreate(AST_MUL, 0, $1, $3, 0, 0); }
+	| exp '/' exp			{ $$ = astCreate(AST_DIV, 0, $1, $3, 0, 0); }
+	| exp '<' exp			{ $$ = astCreate(AST_LT, 0, $1, $3, 0, 0); }
+	| exp '>' exp			{ $$ = astCreate(AST_GT, 0, $1, $3, 0, 0); }
+	| exp '.' exp			{ $$ = astCreate(AST_AND, 0, $1, $3, 0, 0); }
+	| exp 'v' exp			{ $$ = astCreate(AST_OR, 0, $1, $3, 0, 0); }
+	| exp OPERATOR_LE exp		{ $$ = astCreate(AST_LE, 0, $1, $3, 0, 0); }
+	| exp OPERATOR_GE exp		{ $$ = astCreate(AST_GE, 0, $1, $3, 0, 0); }
+	| exp OPERATOR_EQ exp		{ $$ = astCreate(AST_EQ, 0, $1, $3, 0, 0); }
+	| exp OPERATOR_DIF exp		{ $$ = astCreate(AST_DIF, 0, $1, $3, 0, 0); }
 	| '~' exp			{ $$ = 0; }
 	| '(' exp ')'			{ $$ = 0; }
 	;
