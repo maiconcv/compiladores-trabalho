@@ -13,7 +13,7 @@ etapa3: y.tab.o lex.yy.o main.o hash.o astree.o
 y.tab.o: y.tab.c
 	gcc -c y.tab.c -Wall
 
-lex.yy.o: lex.yy.c y.tab.c
+lex.yy.o: lex.yy.c
 	gcc -c lex.yy.c
 
 main.o: main.c
@@ -28,8 +28,8 @@ astree.o: astree.c
 lex.yy.c: scanner.l
 	lex --header-file=lex.yy.h scanner.l
 
-y.tab.c: parser.y
+y.tab.c: parser.y lex.yy.c
 	yacc parser.y -d
 
 clean:
-	rm  *.o y.tab.h y.tab.c lex.yy.c etapa3
+	rm  *.o y.tab.h y.tab.c lex.yy.c lex.yy.h etapa3
