@@ -36,6 +36,7 @@ void astPrint(AST* node, int level){
 		case AST_NOT: fprintf(stderr, "AST_NOT,"); break;
 		case AST_BRACKETS: fprintf(stderr, "AST_BRACKETS,"); break;
 		case AST_VECTREAD: fprintf(stderr, "AST_VECTREAD,"); break;
+		case AST_ASSIGN: fprintf(stderr, "AST_ASSIGN,"); break;
 		default: break;	
 	}
 

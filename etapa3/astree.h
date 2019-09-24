@@ -22,6 +22,7 @@
 #define AST_NOT 14
 #define AST_BRACKETS 15
 #define AST_VECTREAD 16
+#define AST_ASSIGN 17
 
 typedef struct astree_node{
 	int type;

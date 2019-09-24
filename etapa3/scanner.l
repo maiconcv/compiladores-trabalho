@@ -40,10 +40,10 @@ DIGIT [0-9]
 {DIGIT}+"."{DIGIT}+		{ yylval.symbol = hashInsert(yytext); return LIT_FLOAT; }
 "."{DIGIT}+			{ yylval.symbol = hashInsert(yytext); return LIT_FLOAT; }
 {DIGIT}+"."			{ yylval.symbol = hashInsert(yytext); return LIT_FLOAT; }
-"TRUE"				{ hashInsert(yytext); return LIT_TRUE; }
-"FALSE"				{ hashInsert(yytext); return LIT_FALSE; }
-\'.\'				{ hashInsert(yytext); return LIT_CHAR; }
-\"(\\.|[^"])*\"			{ hashInsert(yytext); return LIT_STRING; }
+"TRUE"				{ yylval.symbol = hashInsert(yytext); return LIT_TRUE; }
+"FALSE"				{ yylval.symbol = hashInsert(yytext); return LIT_FALSE; }
+\'.\'				{ yylval.symbol = hashInsert(yytext); return LIT_CHAR; }
+\"(\\.|[^"])*\"			{ yylval.symbol = hashInsert(yytext); return LIT_STRING; }
 
 [,;:()\[\]{}+\-*/<>=v.~&$#]	return yytext[0];
 

@@ -54,6 +54,7 @@ int getLineNumber(void);
 
 
 %type<ast> exp
+%type<ast> cmd
 
 %%
 
@@ -100,17 +101,17 @@ paramrest: ',' param paramrest
 param: type TK_IDENTIFIER
 	;
 
-cmd: TK_IDENTIFIER '=' exp	{ astPrint($3, 0); }
-	| TK_IDENTIFIER '[' exp ']' '=' exp
-	| KW_READ TK_IDENTIFIER
-	| KW_PRINT printarglist
-	| KW_RETURN exp
-	| KW_IF '(' exp ')' KW_THEN cmd haselse
-	| KW_WHILE '(' exp ')' cmd
-	| KW_BREAK
-	| KW_FOR '(' TK_IDENTIFIER ':' exp ',' exp ',' exp ')' cmd
-	| block
-	|
+cmd: TK_IDENTIFIER '=' exp			{ $$ = astCreate(AST_ASSIGN, $1, $3, 0, 0, 0); }
+	| TK_IDENTIFIER '[' exp ']' '=' exp	{ $$ = 0; }
+	| KW_READ TK_IDENTIFIER			{ $$ = 0; }
+	| KW_PRINT printarglist			{ $$ = 0; }
+	| KW_RETURN exp				{ $$ = 0; }
+	| KW_IF '(' exp ')' KW_THEN cmd haselse	{ $$ = 0; }
+	| KW_WHILE '(' exp ')' cmd		{ $$ = 0; }
+	| KW_BREAK				{ $$ = 0; }
+	| KW_FOR '(' TK_IDENTIFIER ':' exp ',' exp ',' exp ')' cmd	{ $$ = 0; }
+	| block					{ $$ = 0; }
+	|					{ $$ = 0; }
 	;
 
 haselse: KW_ELSE cmd
@@ -164,8 +165,8 @@ argrest: ',' exp argrest
 block: '{' lcmd '}'
 	;
 
-lcmd: cmd ';' lcmd
-	| cmd
+lcmd: cmd ';' lcmd			{ astPrint($1, 0); }
+	| cmd				{ astPrint($1, 0); }
 	;
 
 %%
