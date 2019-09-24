@@ -55,6 +55,10 @@ int getLineNumber(void);
 
 %type<ast> exp
 %type<ast> cmd
+%type<ast> lcmd
+
+%left '+' '-'
+%left '*' '/'
 
 %%
 
@@ -162,11 +166,11 @@ argrest: ',' exp argrest
 	|
 	;
 
-block: '{' lcmd '}'
+block: '{' lcmd '}'			{ astPrint($2, 0); }
 	;
 
-lcmd: cmd ';' lcmd			{ astPrint($1, 0); }
-	| cmd				{ astPrint($1, 0); }
+lcmd: cmd ';' lcmd			{ $$ = astCreate(AST_LCMD, 0, $1, $3, 0, 0); }
+	| cmd				{ $$ = 0; }
 	;
 
 %%
