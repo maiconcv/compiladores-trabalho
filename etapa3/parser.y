@@ -135,7 +135,7 @@ exp: LIT_INTEGER 			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
 	| LIT_CHAR			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
 	| LIT_STRING			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
 	| TK_IDENTIFIER			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
-	| TK_IDENTIFIER '[' exp ']'	{ $$ = 0; }
+	| TK_IDENTIFIER '[' exp ']'	{ $$ = astCreate(AST_VECTREAD, $1, $3, 0, 0, 0); }
 	| TK_IDENTIFIER '(' arglist ')' { $$ = 0; }
 	| exp '+' exp			{ $$ = astCreate(AST_ADD, 0, $1, $3, 0, 0); }
 	| exp '-' exp			{ $$ = astCreate(AST_SUB, 0, $1, $3, 0, 0); }
@@ -149,8 +149,8 @@ exp: LIT_INTEGER 			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
 	| exp OPERATOR_GE exp		{ $$ = astCreate(AST_GE, 0, $1, $3, 0, 0); }
 	| exp OPERATOR_EQ exp		{ $$ = astCreate(AST_EQ, 0, $1, $3, 0, 0); }
 	| exp OPERATOR_DIF exp		{ $$ = astCreate(AST_DIF, 0, $1, $3, 0, 0); }
-	| '~' exp			{ $$ = 0; }
-	| '(' exp ')'			{ $$ = 0; }
+	| '~' exp			{ $$ = astCreate(AST_NOT, 0, $2, 0, 0, 0); }
+	| '(' exp ')'			{ $$ = astCreate(AST_BRACKETS, 0, $2, 0, 0, 0); }
 	;
 
 arglist: exp argrest

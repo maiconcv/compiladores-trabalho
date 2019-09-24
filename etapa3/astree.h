@@ -19,6 +19,9 @@
 #define AST_GE 11
 #define AST_EQ 12
 #define AST_DIF 13
+#define AST_NOT 14
+#define AST_BRACKETS 15
+#define AST_VECTREAD 16
 
 typedef struct astree_node{
 	int type;
