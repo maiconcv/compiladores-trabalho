@@ -56,31 +56,49 @@ int getLineNumber(void);
 %type<ast> exp
 %type<ast> cmd
 %type<ast> lcmd
+%type<ast> block
+%type<ast> vardecl
+%type<ast> fundecl
+%type<ast> vectdecl
+%type<ast> programa
+%type<ast> type
+%type<ast> decl
+%type<ast> init
 
 %left '+' '-'
 %left '*' '/'
 
 %%
 
+begin: programa					{ astPrint($1, 0); }
+	;
 
-
-programa: programa decl
-	|
+programa: programa decl				{ $$ = astCreate(AST_LDECL, 0, $1, $2, 0, 0); }
+	|					{ $$ = 0; }
 	;
 
 decl: vardecl | fundecl | vectdecl
 	;
 
-vardecl: type TK_IDENTIFIER '=' init ';'
+vardecl: type TK_IDENTIFIER '=' init ';'	{ $$ = astCreate(AST_VARDECL, $2, $1, $4, 0, 0); }
 	;
 
-type: KW_BYTE | KW_INT | KW_LONG | KW_FLOAT | KW_BOOL
+type: KW_BYTE				{ $$ = astCreate(AST_TYPEBYTE, 0, 0, 0, 0, 0); }
+	| KW_INT			{ $$ = astCreate(AST_TYPEINT, 0, 0, 0, 0, 0); }
+	| KW_LONG			{ $$ = astCreate(AST_TYPELONG, 0, 0, 0, 0, 0); }
+	| KW_FLOAT			{ $$ = astCreate(AST_TYPEFLOAT, 0, 0, 0, 0, 0); }
+	| KW_BOOL			{ $$ = astCreate(AST_TYPEBOOL, 0, 0, 0, 0, 0); }
 	;
 
-init: LIT_INTEGER | LIT_FLOAT | LIT_TRUE | LIT_FALSE | LIT_CHAR | LIT_STRING
+init: LIT_INTEGER			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
+	| LIT_FLOAT			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
+	| LIT_TRUE			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
+	| LIT_FALSE			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
+	| LIT_CHAR			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
+	| LIT_STRING			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
 	;
 
-fundecl: type TK_IDENTIFIER '(' paramlist ')' cmd
+fundecl: type TK_IDENTIFIER '(' paramlist ')' cmd	{ $$ = astCreate(AST_FUNDECL, $2, $6, 0, 0, 0); }
 	;
 
 vectdecl: type TK_IDENTIFIER '[' LIT_INTEGER ']' vectatrib ';'
@@ -114,7 +132,7 @@ cmd: TK_IDENTIFIER '=' exp			{ $$ = astCreate(AST_ASSIGN, $1, $3, 0, 0, 0); }
 	| KW_WHILE '(' exp ')' cmd		{ $$ = 0; }
 	| KW_BREAK				{ $$ = 0; }
 	| KW_FOR '(' TK_IDENTIFIER ':' exp ',' exp ',' exp ')' cmd	{ $$ = 0; }
-	| block					{ $$ = 0; }
+	| block					{ $$ = $1; }
 	|					{ $$ = 0; }
 	;
 
@@ -166,7 +184,7 @@ argrest: ',' exp argrest
 	|
 	;
 
-block: '{' lcmd '}'			{ astPrint($2, 0); }
+block: '{' lcmd '}'			{ $$ = $2; }
 	;
 
 lcmd: cmd ';' lcmd			{ $$ = astCreate(AST_LCMD, 0, $1, $3, 0, 0); }

@@ -24,6 +24,15 @@
 #define AST_VECTREAD 16
 #define AST_ASSIGN 17
 #define AST_LCMD 18
+#define AST_VARDECL 19
+#define AST_FUNDECL 20
+#define AST_VECTDECL 21
+#define AST_LDECL 22
+#define AST_TYPEBYTE 23
+#define AST_TYPEINT 24
+#define AST_TYPELONG 25
+#define AST_TYPEFLOAT 26
+#define AST_TYPEBOOL 27
 
 typedef struct astree_node{
 	int type;
