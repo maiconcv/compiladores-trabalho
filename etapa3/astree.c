@@ -47,6 +47,14 @@ void astPrint(AST* node, int level){
 		case AST_TYPELONG: fprintf(stderr, "AST_TYPELONG,"); break;
 		case AST_TYPEFLOAT: fprintf(stderr, "AST_TYPEFLOAT,"); break;
 		case AST_TYPEBOOL: fprintf(stderr, "AST_TYPEBOOL,"); break;
+		case AST_VECTASSIGN: fprintf(stderr, "AST_VECTASSIGN,"); break;
+		case AST_READ: fprintf(stderr, "AST_READ,"); break;
+		case AST_RETURN: fprintf(stderr, "AST_RETURN,"); break;
+		case AST_IF: fprintf(stderr, "AST_IF,"); break;
+		case AST_IFELSE: fprintf(stderr, "AST_IFELSE,"); break;
+		case AST_WHILE: fprintf(stderr, "AST_WHILE,"); break;
+		case AST_BREAK: fprintf(stderr, "AST_BREAK,"); break;
+		case AST_FOR: fprintf(stderr, "AST_FOR,"); break;
 		default: break;	
 	}
 

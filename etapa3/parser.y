@@ -123,21 +123,18 @@ paramrest: ',' param paramrest
 param: type TK_IDENTIFIER
 	;
 
-cmd: TK_IDENTIFIER '=' exp			{ $$ = astCreate(AST_ASSIGN, $1, $3, 0, 0, 0); }
-	| TK_IDENTIFIER '[' exp ']' '=' exp	{ $$ = 0; }
-	| KW_READ TK_IDENTIFIER			{ $$ = 0; }
-	| KW_PRINT printarglist			{ $$ = 0; }
-	| KW_RETURN exp				{ $$ = 0; }
-	| KW_IF '(' exp ')' KW_THEN cmd haselse	{ $$ = 0; }
-	| KW_WHILE '(' exp ')' cmd		{ $$ = 0; }
-	| KW_BREAK				{ $$ = 0; }
-	| KW_FOR '(' TK_IDENTIFIER ':' exp ',' exp ',' exp ')' cmd	{ $$ = 0; }
-	| block					{ $$ = $1; }
-	|					{ $$ = 0; }
-	;
-
-haselse: KW_ELSE cmd
-	|
+cmd: TK_IDENTIFIER '=' exp				{ $$ = astCreate(AST_ASSIGN, $1, $3, 0, 0, 0); }
+	| TK_IDENTIFIER '[' exp ']' '=' exp		{ $$ = astCreate(AST_VECTASSIGN, $1, $3, $6, 0, 0); }
+	| KW_READ TK_IDENTIFIER				{ $$ = astCreate(AST_READ, $2, 0, 0, 0, 0); }
+	| KW_PRINT printarglist				{ $$ = 0; }
+	| KW_RETURN exp					{ $$ = astCreate(AST_RETURN, 0, $2, 0, 0, 0); }
+	| KW_IF '(' exp ')' KW_THEN cmd			{ $$ = astCreate(AST_IF, 0, $3, $6, 0, 0); }
+	| KW_IF '(' exp ')' KW_THEN cmd KW_ELSE cmd	{ $$ = astCreate(AST_IFELSE, 0, $3, $6, $8, 0); }
+	| KW_WHILE '(' exp ')' cmd			{ $$ = astCreate(AST_WHILE, 0, $3, $5, 0, 0); }
+	| KW_BREAK					{ $$ = astCreate(AST_BREAK, 0, 0, 0, 0, 0); }
+	| KW_FOR '(' TK_IDENTIFIER ':' exp ',' exp ',' exp ')' cmd	{ $$ = astCreate(AST_FOR, $3, $5, $7, $9, $11); }
+	| block						{ $$ = $1; }
+	|						{ $$ = 0; }
 	;
 
 printarglist: exp printargrest
@@ -188,7 +185,7 @@ block: '{' lcmd '}'			{ $$ = $2; }
 	;
 
 lcmd: cmd ';' lcmd			{ $$ = astCreate(AST_LCMD, 0, $1, $3, 0, 0); }
-	| cmd				{ $$ = 0; }
+	| cmd				{ $$ = astCreate(AST_LCMD, 0, $1, 0, 0, 0); }
 	;
 
 %%

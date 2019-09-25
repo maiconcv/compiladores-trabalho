@@ -33,6 +33,14 @@
 #define AST_TYPELONG 25
 #define AST_TYPEFLOAT 26
 #define AST_TYPEBOOL 27
+#define AST_VECTASSIGN 28
+#define AST_READ 29
+#define AST_RETURN 30
+#define AST_IF 31
+#define AST_IFELSE 32
+#define AST_WHILE 33
+#define AST_BREAK 34
+#define AST_FOR 35
 
 typedef struct astree_node{
 	int type;
