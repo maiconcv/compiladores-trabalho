@@ -75,3 +75,22 @@ void astPrint(AST* node, int level){
 		astPrint(node->son[i], level + 1);
 }
 
+void astToSourceCode(FILE* file, AST* node){
+	if(node != NULL){
+		switch(node->type){
+			case AST_SYMBOL: fprintf(file, "%s", node->symbol->text);
+					break;
+			case AST_LDECL: astToSourceCode(file, node->son[0]);
+					astToSourceCode(file, node->son[1]);
+					break;
+			case AST_VARDECL: astToSourceCode(file, node->son[0]); // will print the type
+					fprintf(file, "%s = ", node->symbol->text); // will print the name of variable
+					astToSourceCode(file, node->son[1]); // will print the init value
+					fprintf(file, ";\n");
+					break;
+			case AST_TYPEINT: fprintf(file, "int ");
+					break;
+			default: break;
+		}
+	}
+}

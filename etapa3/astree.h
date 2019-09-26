@@ -58,5 +58,6 @@ typedef struct astree_node{
 
 AST* astCreate(int type, HASH_NODE* symbol, AST* s0, AST* s1, AST* s2, AST* s3);
 void astPrint(AST* node, int level);
+void astToSourceCode(FILE* file, AST* node);
 
 #endif // COMP_ASTREE_H

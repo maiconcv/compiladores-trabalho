@@ -10,6 +10,7 @@
 int yyerror(const char* msg);
 int getLineNumber(void);
 //int yylex();
+FILE* output = NULL;
 
 %}
 
@@ -79,7 +80,7 @@ int getLineNumber(void);
 
 %%
 
-begin: programa					{ astPrint($1, 0); }
+begin: programa					{ astPrint($1, 0); astToSourceCode(output, $1); }
 	;
 
 programa: programa decl				{ $$ = astCreate(AST_LDECL, 0, $1, $2, 0, 0); }
@@ -205,4 +206,8 @@ lcmd: cmd ';' lcmd			{ $$ = astCreate(AST_LCMD, 0, $1, $3, 0, 0); }
 int yyerror(const char* msg){
 	fprintf(stderr, "Erro de sintaxe na linha %d!\n", getLineNumber());
 	exit(3);
+}
+
+void outputFile(FILE* file){
+	output = file;
 }
