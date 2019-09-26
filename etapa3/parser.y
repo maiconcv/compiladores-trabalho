@@ -66,6 +66,13 @@ int getLineNumber(void);
 %type<ast> init
 %type<ast> vectatrib
 %type<ast> lstinit
+%type<ast> param
+%type<ast> paramrest
+%type<ast> paramlist
+%type<ast> printarglist
+%type<ast> printargrest
+%type<ast> argrest
+%type<ast> arglist
 
 %left '+' '-'
 %left '*' '/'
@@ -100,7 +107,7 @@ init: LIT_INTEGER			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
 	| LIT_STRING			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
 	;
 
-fundecl: type TK_IDENTIFIER '(' paramlist ')' cmd	{ $$ = astCreate(AST_FUNDECL, $2, $1, $6, 0, 0); }
+fundecl: type TK_IDENTIFIER '(' paramlist ')' cmd	{ $$ = astCreate(AST_FUNDECL, $2, $1, $4, $6, 0); }
 	;
 
 vectdecl: type TK_IDENTIFIER '[' LIT_INTEGER ']' vectatrib ';'	{ AST* vectSizeASTNode = astCreate(AST_SYMBOL, $4, 0, 0, 0, 0);
@@ -115,21 +122,21 @@ lstinit: init lstinit			{ $$ = astCreate(AST_LSTLIT, 0, $1, $2, 0, 0); }
 	|				{ $$ = 0; }
 	;
 
-paramlist: param paramrest
-	|
+paramlist: param paramrest		{ $$ = astCreate(AST_LSTPARAM, 0, $1, $2, 0, 0); }
+	|				{ $$ = 0; }
 	;
 
-paramrest: ',' param paramrest
-	|
+paramrest: ',' param paramrest		{ $$ = astCreate(AST_LSTPARAM, 0, $2, $3, 0, 0); }
+	|				{ $$ = 0; }
 	;
 
-param: type TK_IDENTIFIER
+param: type TK_IDENTIFIER		{ $$ = astCreate(AST_PARAM, $2, $1, 0, 0, 0); }
 	;
 
 cmd: TK_IDENTIFIER '=' exp				{ $$ = astCreate(AST_ASSIGN, $1, $3, 0, 0, 0); }
 	| TK_IDENTIFIER '[' exp ']' '=' exp		{ $$ = astCreate(AST_VECTASSIGN, $1, $3, $6, 0, 0); }
 	| KW_READ TK_IDENTIFIER				{ $$ = astCreate(AST_READ, $2, 0, 0, 0, 0); }
-	| KW_PRINT printarglist				{ $$ = 0; }
+	| KW_PRINT printarglist				{ $$ = astCreate(AST_PRINT, 0, $2, 0, 0, 0); }
 	| KW_RETURN exp					{ $$ = astCreate(AST_RETURN, 0, $2, 0, 0, 0); }
 	| KW_IF '(' exp ')' KW_THEN cmd			{ $$ = astCreate(AST_IF, 0, $3, $6, 0, 0); }
 	| KW_IF '(' exp ')' KW_THEN cmd KW_ELSE cmd	{ $$ = astCreate(AST_IFELSE, 0, $3, $6, $8, 0); }
@@ -140,11 +147,11 @@ cmd: TK_IDENTIFIER '=' exp				{ $$ = astCreate(AST_ASSIGN, $1, $3, 0, 0, 0); }
 	|						{ $$ = 0; }
 	;
 
-printarglist: exp printargrest
+printarglist: exp printargrest				{ $$ = astCreate(AST_PRINTARG, 0, $1, $2, 0, 0); }
 	;
 
-printargrest: printargsep exp printargrest
-	|
+printargrest: printargsep exp printargrest		{ $$ = astCreate(AST_PRINTARG, 0, $2, $3, 0, 0); }
+	|						{ $$ = 0; }
 	;
 
 printargsep: ','
@@ -159,7 +166,7 @@ exp: LIT_INTEGER 			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
 	| LIT_STRING			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
 	| TK_IDENTIFIER			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
 	| TK_IDENTIFIER '[' exp ']'	{ $$ = astCreate(AST_VECTREAD, $1, $3, 0, 0, 0); }
-	| TK_IDENTIFIER '(' arglist ')' { $$ = 0; }
+	| TK_IDENTIFIER '(' arglist ')' { $$ = astCreate(AST_FUNCALL, $1, $3, 0, 0, 0); }
 	| exp '+' exp			{ $$ = astCreate(AST_ADD, 0, $1, $3, 0, 0); }
 	| exp '-' exp			{ $$ = astCreate(AST_SUB, 0, $1, $3, 0, 0); }
 	| exp '*' exp			{ $$ = astCreate(AST_MUL, 0, $1, $3, 0, 0); }
@@ -176,12 +183,12 @@ exp: LIT_INTEGER 			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
 	| '(' exp ')'			{ $$ = astCreate(AST_BRACKETS, 0, $2, 0, 0, 0); }
 	;
 
-arglist: exp argrest
-	|
+arglist: exp argrest			{ $$ = astCreate(AST_FUNARG, 0, $1, $2, 0, 0); }
+	|				{ $$ = 0; }
 	;
 
-argrest: ',' exp argrest
-	|
+argrest: ',' exp argrest		{ $$ = astCreate(AST_FUNARG, 0, $2, $3, 0, 0); }
+	|				{ $$ = 0; }
 	;
 
 block: '{' lcmd '}'			{ $$ = $2; }

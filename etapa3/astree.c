@@ -57,6 +57,12 @@ void astPrint(AST* node, int level){
 		case AST_FOR: fprintf(stderr, "AST_FOR,"); break;
 		case AST_VECTINIT: fprintf(stderr, "AST_VECTINIT,"); break;
 		case AST_LSTLIT: fprintf(stderr, "AST_LSTLIT,"); break;
+		case AST_LSTPARAM: fprintf(stderr, "AST_LSTPARAM,"); break;
+		case AST_PARAM: fprintf(stderr, "AST_PARAM,"); break;
+		case AST_PRINT: fprintf(stderr, "AST_PRINT,"); break;
+		case AST_PRINTARG: fprintf(stderr, "AST_PRINTARG,"); break;
+		case AST_FUNCALL: fprintf(stderr, "AST_FUNCALL,"); break;
+		case AST_FUNARG: fprintf(stderr, "AST_FUNARG,"); break;
 		default: break;	
 	}
 

@@ -43,6 +43,12 @@
 #define AST_FOR 35
 #define AST_VECTINIT 36
 #define AST_LSTLIT 37
+#define AST_LSTPARAM 38
+#define AST_PARAM 39
+#define AST_PRINT 40
+#define AST_PRINTARG 41
+#define AST_FUNCALL 42
+#define AST_FUNARG 43
 
 typedef struct astree_node{
 	int type;
