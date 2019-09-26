@@ -99,33 +99,33 @@ void astToSourceCode(FILE* file, AST* node, int level, int firstParamOrArg){
 			case AST_BRACKETS: break;
 			case AST_VECTREAD: break;
 			case AST_ASSIGN: fprintf(file, "%s = ", node->symbol->text);
-					astToSourceCode(file, node->son[0], level, 1);
+					astToSourceCode(file, node->son[0], 0, 1);
 					break;
-			case AST_LCMD: astToSourceCode(file, node->son[0], level, 1);
+			case AST_LCMD: astToSourceCode(file, node->son[0], 0, 1);
 					fprintf(file, ";\n");
 					astToSourceCode(file, node->son[1], level, 1);
 					break;
-			case AST_VARDECL: astToSourceCode(file, node->son[0], level, 1); // will print the type
+			case AST_VARDECL: astToSourceCode(file, node->son[0], 0, 1); // will print the type
 					fprintf(file, "%s = ", node->symbol->text); // will print the name of variable
-					astToSourceCode(file, node->son[1], level, 1); // will print the init value
+					astToSourceCode(file, node->son[1], 0, 1); // will print the init value
 					fprintf(file, ";\n");
 					break;
-			case AST_FUNDECL: astToSourceCode(file, node->son[0], level, 1); // will print the type
+			case AST_FUNDECL: astToSourceCode(file, node->son[0], 0, 1); // will print the type
 					fprintf(file, "%s(", node->symbol->text); // will print the name of the function
-					astToSourceCode(file, node->son[1], level, 1); // will print the parameters
+					astToSourceCode(file, node->son[1], 0, 1); // will print the parameters
 					fprintf(file, "){\n");
 					astToSourceCode(file, node->son[2], level+1, 1); // will print the cmd
-					fprintf(file, "\n}\n");
+					fprintf(file, "}\n");
 					break;
-			case AST_VECTDECL: astToSourceCode(file, node->son[0], level, 1); // print type
+			case AST_VECTDECL: astToSourceCode(file, node->son[0], 0, 1); // print type
 					fprintf(file, "%s[", node->symbol->text); // print name
-					astToSourceCode(file, node->son[1], level, 1); // print vector size
+					astToSourceCode(file, node->son[1], 0, 1); // print vector size
 					fprintf(file, "]");
-					astToSourceCode(file, node->son[2], level, 1); // print init values
+					astToSourceCode(file, node->son[2], 0, 1); // print init values
 					fprintf(file, ";\n");
 					break;
-			case AST_LDECL: astToSourceCode(file, node->son[0], level, 1);
-					astToSourceCode(file, node->son[1], level, 1);
+			case AST_LDECL: astToSourceCode(file, node->son[0], 0, 1);
+					astToSourceCode(file, node->son[1], 0, 1);
 					break;
 			case AST_TYPEBYTE: fprintf(file, "byte ");
 					break;
@@ -146,18 +146,18 @@ void astToSourceCode(FILE* file, AST* node, int level, int firstParamOrArg){
 			case AST_BREAK: break;
 			case AST_FOR: break;
 			case AST_VECTINIT: fprintf(file, ": ");
-					astToSourceCode(file, node->son[0], level, 1); // print list of literals
+					astToSourceCode(file, node->son[0], 0, 1); // print list of literals
 					break;
-			case AST_LSTLIT: astToSourceCode(file, node->son[0], level, 1); // print first literal
+			case AST_LSTLIT: astToSourceCode(file, node->son[0], 0, 1); // print first literal
 					fprintf(file, " ");
-					astToSourceCode(file, node->son[1], level, 1); // print rest of literals
+					astToSourceCode(file, node->son[1], 0, 1); // print rest of literals
 					break;
 			case AST_LSTPARAM: if(!firstParamOrArg)
 						fprintf(file, ", ");
-					astToSourceCode(file, node->son[0], level, 0);
-					astToSourceCode(file, node->son[1], level, 0);
+					astToSourceCode(file, node->son[0], 0, 0);
+					astToSourceCode(file, node->son[1], 0, 0);
 					break;
-			case AST_PARAM: astToSourceCode(file, node->son[0], level, 1); // print type
+			case AST_PARAM: astToSourceCode(file, node->son[0], 0, 1); // print type
 					fprintf(file, "%s", node->symbol->text); // print name
 					break;
 			case AST_PRINT: break;
