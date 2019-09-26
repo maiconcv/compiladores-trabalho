@@ -80,7 +80,7 @@ FILE* output = NULL;
 
 %%
 
-begin: programa					{ astPrint($1, 0); astToSourceCode(output, $1); }
+begin: programa					{ astPrint($1, 0); astToSourceCode(output, $1, 0, 1); }
 	;
 
 programa: programa decl				{ $$ = astCreate(AST_LDECL, 0, $1, $2, 0, 0); }
