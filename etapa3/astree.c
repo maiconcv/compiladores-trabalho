@@ -181,13 +181,21 @@ void astToSourceCode(FILE* file, AST* node, int level, int firstParamOrArg){
 					break;
 			case AST_TYPEBOOL: fprintf(file, "bool ");
 					break;
-			case AST_VECTASSIGN: break;
-			case AST_READ: break;
-			case AST_RETURN: break;
+			case AST_VECTASSIGN: fprintf(file, "%s[", node->symbol->text);
+					astToSourceCode(file, node->son[0], 0, 1);
+					fprintf(file, "] = ");
+					astToSourceCode(file, node->son[1], 0, 1);
+					break;
+			case AST_READ: fprintf(file, "read %s", node->symbol->text);
+					break;
+			case AST_RETURN: fprintf(file, "return ");
+					astToSourceCode(file, node->son[0], 0, 1);
+					break;
 			case AST_IF: break;
 			case AST_IFELSE: break;
 			case AST_WHILE: break;
-			case AST_BREAK: break;
+			case AST_BREAK: fprintf(file, "break");
+					break;
 			case AST_FOR: break;
 			case AST_VECTINIT: fprintf(file, ": ");
 					astToSourceCode(file, node->son[0], 0, 1); // print list of literals
@@ -204,8 +212,13 @@ void astToSourceCode(FILE* file, AST* node, int level, int firstParamOrArg){
 			case AST_PARAM: astToSourceCode(file, node->son[0], 0, 1); // print type
 					fprintf(file, "%s", node->symbol->text); // print name
 					break;
-			case AST_PRINT: break;
-			case AST_PRINTARG: break;
+			case AST_PRINT: fprintf(file, "print ");
+					astToSourceCode(file, node->son[0], 0, 1);
+					break;
+			case AST_PRINTARG: astToSourceCode(file, node->son[0], 0, 1);
+					fprintf(file, " ");
+					astToSourceCode(file, node->son[1], 0, 1);
+					break;
 			case AST_FUNCALL: break;
 			case AST_FUNARG: break;
 			default: break;
