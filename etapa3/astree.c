@@ -213,14 +213,21 @@ void astToSourceCode(FILE* file, AST* node, int level, int firstParamOrArg){
 					fprintf(file, "%s", node->symbol->text); // print name
 					break;
 			case AST_PRINT: fprintf(file, "print ");
-					astToSourceCode(file, node->son[0], 0, 1);
+					astToSourceCode(file, node->son[0], 0, 1); // print list of arguments
 					break;
-			case AST_PRINTARG: astToSourceCode(file, node->son[0], 0, 1);
+			case AST_PRINTARG: astToSourceCode(file, node->son[0], 0, 1); // print argument
 					fprintf(file, " ");
-					astToSourceCode(file, node->son[1], 0, 1);
+					astToSourceCode(file, node->son[1], 0, 1); // print rest of arguments
 					break;
-			case AST_FUNCALL: break;
-			case AST_FUNARG: break;
+			case AST_FUNCALL: fprintf(file, "%s(", node->symbol->text); // print name
+					astToSourceCode(file, node->son[0], 0, 1); // print arguments
+					fprintf(file, ")");
+					break;
+			case AST_FUNARG: if(!firstParamOrArg)
+						fprintf(file, ", ");
+					astToSourceCode(file, node->son[0], 0, 0); // print argument
+					astToSourceCode(file, node->son[1], 0, 0); // print rest of arguments
+					break;
 			default: break;
 		}
 	}
