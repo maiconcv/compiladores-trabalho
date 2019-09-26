@@ -100,11 +100,11 @@ init: LIT_INTEGER			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
 	| LIT_STRING			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
 	;
 
-fundecl: type TK_IDENTIFIER '(' paramlist ')' cmd	{ $$ = astCreate(AST_FUNDECL, $2, $6, 0, 0, 0); }
+fundecl: type TK_IDENTIFIER '(' paramlist ')' cmd	{ $$ = astCreate(AST_FUNDECL, $2, $1, $6, 0, 0); }
 	;
 
-vectdecl: type TK_IDENTIFIER '[' LIT_INTEGER ']' vectatrib ';'	{ AST* vectIndexASTNode = astCreate(AST_SYMBOL, $4, 0, 0, 0, 0);
-								  $$ = astCreate(AST_VECTDECL, $2, vectIndexASTNode, $6, 0, 0); }
+vectdecl: type TK_IDENTIFIER '[' LIT_INTEGER ']' vectatrib ';'	{ AST* vectSizeASTNode = astCreate(AST_SYMBOL, $4, 0, 0, 0, 0);
+								  $$ = astCreate(AST_VECTDECL, $2, $1, vectSizeASTNode, $6, 0); }
 	;
 
 vectatrib: ':' lstinit			{ $$ = astCreate(AST_VECTINIT, 0, $2, 0, 0, 0); }
