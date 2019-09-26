@@ -41,6 +41,8 @@
 #define AST_WHILE 33
 #define AST_BREAK 34
 #define AST_FOR 35
+#define AST_VECTINIT 36
+#define AST_LSTLIT 37
 
 typedef struct astree_node{
 	int type;

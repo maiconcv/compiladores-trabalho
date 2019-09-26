@@ -64,6 +64,8 @@ int getLineNumber(void);
 %type<ast> type
 %type<ast> decl
 %type<ast> init
+%type<ast> vectatrib
+%type<ast> lstinit
 
 %left '+' '-'
 %left '*' '/'
@@ -101,15 +103,16 @@ init: LIT_INTEGER			{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
 fundecl: type TK_IDENTIFIER '(' paramlist ')' cmd	{ $$ = astCreate(AST_FUNDECL, $2, $6, 0, 0, 0); }
 	;
 
-vectdecl: type TK_IDENTIFIER '[' LIT_INTEGER ']' vectatrib ';'
+vectdecl: type TK_IDENTIFIER '[' LIT_INTEGER ']' vectatrib ';'	{ AST* vectIndexASTNode = astCreate(AST_SYMBOL, $4, 0, 0, 0, 0);
+								  $$ = astCreate(AST_VECTDECL, $2, vectIndexASTNode, $6, 0, 0); }
 	;
 
-vectatrib: ':' lstinit
-	|
+vectatrib: ':' lstinit			{ $$ = astCreate(AST_VECTINIT, 0, $2, 0, 0, 0); }
+	|				{ $$ = 0; }
 	;
 
-lstinit: init lstinit
-	|
+lstinit: init lstinit			{ $$ = astCreate(AST_LSTLIT, 0, $1, $2, 0, 0); }
+	|				{ $$ = 0; }
 	;
 
 paramlist: param paramrest
