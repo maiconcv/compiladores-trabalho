@@ -131,7 +131,7 @@ void astToSourceCode(FILE* file, AST* node, int level, int firstParamOrArg){
 					fprintf(file, " != ");
 					astToSourceCode(file, node->son[1], 0, 1);
 					break;
-			case AST_NOT: fprintf(file, " ~ ");
+			case AST_NOT: fprintf(file, " ~");
 					astToSourceCode(file, node->son[0], 0, 1);
 					break;
 			case AST_BRACKETS: fprintf(file, "(");
@@ -193,7 +193,12 @@ void astToSourceCode(FILE* file, AST* node, int level, int firstParamOrArg){
 					break;
 			case AST_IF: break;
 			case AST_IFELSE: break;
-			case AST_WHILE: break;
+			case AST_WHILE: fprintf(file, "while(");
+					astToSourceCode(file, node->son[0], 0, 1);
+					fprintf(file, "){\n");
+					astToSourceCode(file, node->son[1], level+1, 1);
+					fprintf(file, "}");
+					break;
 			case AST_BREAK: fprintf(file, "break");
 					break;
 			case AST_FOR: break;
