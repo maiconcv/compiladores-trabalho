@@ -98,8 +98,13 @@ void astToSourceCode(FILE* file, AST* node, int level, int firstParamOrArg){
 			case AST_NOT: break;
 			case AST_BRACKETS: break;
 			case AST_VECTREAD: break;
-			case AST_ASSIGN: break;
-			case AST_LCMD: break;
+			case AST_ASSIGN: fprintf(file, "%s = ", node->symbol->text);
+					astToSourceCode(file, node->son[0], level, 1);
+					break;
+			case AST_LCMD: astToSourceCode(file, node->son[0], level, 1);
+					fprintf(file, ";\n");
+					astToSourceCode(file, node->son[1], level, 1);
+					break;
 			case AST_VARDECL: astToSourceCode(file, node->son[0], level, 1); // will print the type
 					fprintf(file, "%s = ", node->symbol->text); // will print the name of variable
 					astToSourceCode(file, node->son[1], level, 1); // will print the init value
