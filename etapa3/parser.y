@@ -75,6 +75,9 @@ FILE* output = NULL;
 %type<ast> argrest
 %type<ast> arglist
 
+
+%left '.' 'v'
+%left '~' '<' '>' OPERATOR_LE OPERATOR_GE OPERATOR_EQ OPERATOR_DIF
 %left '+' '-'
 %left '*' '/'
 
