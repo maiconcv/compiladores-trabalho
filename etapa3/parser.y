@@ -144,7 +144,7 @@ cmd: TK_IDENTIFIER '=' exp				{ $$ = astCreate(AST_ASSIGN, $1, $3, 0, 0, 0); }
 	| KW_WHILE '(' exp ')' cmd			{ $$ = astCreate(AST_WHILE, 0, $3, $5, 0, 0); }
 	| KW_BREAK					{ $$ = astCreate(AST_BREAK, 0, 0, 0, 0, 0); }
 	| KW_FOR '(' TK_IDENTIFIER ':' exp ',' exp ',' exp ')' cmd	{ $$ = astCreate(AST_FOR, $3, $5, $7, $9, $11); }
-	| block						{ $$ = $1; }
+	| block						{ $$ = astCreate(AST_BLOCK, 0, $1, 0, 0, 0); }
 	|						{ $$ = 0; }
 	;
 

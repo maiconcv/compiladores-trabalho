@@ -49,6 +49,7 @@
 #define AST_PRINTARG 41
 #define AST_FUNCALL 42
 #define AST_FUNARG 43
+#define AST_BLOCK 44
 
 typedef struct astree_node{
 	int type;

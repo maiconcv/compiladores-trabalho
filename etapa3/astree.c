@@ -63,6 +63,7 @@ void astPrint(AST* node, int level){
 		case AST_PRINTARG: fprintf(stderr, "AST_PRINTARG,"); break;
 		case AST_FUNCALL: fprintf(stderr, "AST_FUNCALL,"); break;
 		case AST_FUNARG: fprintf(stderr, "AST_FUNARG,"); break;
+		case AST_BLOCK: fprintf(stderr, "AST_BLOCK,"); break;
 		default: break;	
 	}
 
@@ -77,8 +78,8 @@ void astPrint(AST* node, int level){
 
 void astToSourceCode(FILE* file, AST* node, int level, int firstParamOrArg){
 	if(node != NULL){
-		for(int i = 0; i < level; i++)
-			fprintf(file, "\t");
+		//for(int i = 0; i < level; i++)
+			//fprintf(file, "\t");
 
 		switch(node->type){
 			case AST_SYMBOL: fprintf(file, "%s", node->symbol->text);
@@ -145,9 +146,11 @@ void astToSourceCode(FILE* file, AST* node, int level, int firstParamOrArg){
 			case AST_ASSIGN: fprintf(file, "%s = ", node->symbol->text);
 					astToSourceCode(file, node->son[0], 0, 1);
 					break;
-			case AST_LCMD: astToSourceCode(file, node->son[0], 0, 1);
-					fprintf(file, ";\n");
-					astToSourceCode(file, node->son[1], level, 1);
+			case AST_LCMD: if(node->son[0] != NULL){
+						astToSourceCode(file, node->son[0], 0, 1);
+						fprintf(file, ";\n");
+						astToSourceCode(file, node->son[1], level, 1);
+					}
 					break;
 			case AST_VARDECL: astToSourceCode(file, node->son[0], 0, 1); // will print the type
 					fprintf(file, "%s = ", node->symbol->text); // will print the name of variable
@@ -157,9 +160,9 @@ void astToSourceCode(FILE* file, AST* node, int level, int firstParamOrArg){
 			case AST_FUNDECL: astToSourceCode(file, node->son[0], 0, 1); // will print the type
 					fprintf(file, "%s(", node->symbol->text); // will print the name of the function
 					astToSourceCode(file, node->son[1], 0, 1); // will print the parameters
-					fprintf(file, "){\n");
+					fprintf(file, ")");
 					astToSourceCode(file, node->son[2], level+1, 1); // will print the cmd
-					fprintf(file, "}\n");
+					//fprintf(file, "}\n");
 					break;
 			case AST_VECTDECL: astToSourceCode(file, node->son[0], 0, 1); // print type
 					fprintf(file, "%s[", node->symbol->text); // print name
@@ -193,23 +196,23 @@ void astToSourceCode(FILE* file, AST* node, int level, int firstParamOrArg){
 					break;
 			case AST_IF: fprintf(file, "if(");
 					astToSourceCode(file, node->son[0], 0, 1);
-					fprintf(file, ") then {\n");
+					fprintf(file, ") then ");
 					astToSourceCode(file, node->son[1], 0, 1);
-					fprintf(file, "}");
+					//fprintf(file, "}");
 					break;
 			case AST_IFELSE: fprintf(file, "if(");
 					astToSourceCode(file, node->son[0], 0, 1);
-					fprintf(file, ") then {\n");
+					fprintf(file, ") then ");
 					astToSourceCode(file, node->son[1], 0, 1);
-					fprintf(file, "}\nelse {");
+					fprintf(file, "else ");
 					astToSourceCode(file, node->son[2], 0, 1);
-					fprintf(file, "}");
+					//fprintf(file, "}");
 					break;
 			case AST_WHILE: fprintf(file, "while(");
 					astToSourceCode(file, node->son[0], 0, 1);
-					fprintf(file, "){\n");
+					fprintf(file, ")");
 					astToSourceCode(file, node->son[1], level+1, 1);
-					fprintf(file, "}");
+					//fprintf(file, "}");
 					break;
 			case AST_BREAK: fprintf(file, "break");
 					break;
@@ -219,9 +222,9 @@ void astToSourceCode(FILE* file, AST* node, int level, int firstParamOrArg){
 					astToSourceCode(file, node->son[1], 0, 1);
 					fprintf(file, ", ");
 					astToSourceCode(file, node->son[2], 0, 1);
-					fprintf(file, "){\n");
+					fprintf(file, ")");
 					astToSourceCode(file, node->son[3], 0, 1);
-					fprintf(file, "}");
+					//fprintf(file, "}");
 					break;
 			case AST_VECTINIT: fprintf(file, ": ");
 					astToSourceCode(file, node->son[0], 0, 1); // print list of literals
@@ -254,6 +257,9 @@ void astToSourceCode(FILE* file, AST* node, int level, int firstParamOrArg){
 					astToSourceCode(file, node->son[0], 0, 0); // print argument
 					astToSourceCode(file, node->son[1], 0, 0); // print rest of arguments
 					break;
+			case AST_BLOCK: fprintf(file, "{\n");
+					astToSourceCode(file, node->son[0], 0, 1);
+					fprintf(file, "}\n");
 			default: break;
 		}
 	}
