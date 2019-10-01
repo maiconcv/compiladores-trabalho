@@ -159,7 +159,7 @@ void astToSourceCode(FILE* file, AST* node, int firstParamOrArg){
 					astToSourceCode(file, node->son[1], 1); // will print the parameters
 					fprintf(file, ")");
 					astToSourceCode(file, node->son[2], 1); // will print the cmd
-					//fprintf(file, "}\n");
+					fprintf(file, "\n");
 					break;
 			case AST_VECTDECL: astToSourceCode(file, node->son[0], 1); // print type
 					fprintf(file, "%s[", node->symbol->text); // print name
@@ -195,7 +195,6 @@ void astToSourceCode(FILE* file, AST* node, int firstParamOrArg){
 					astToSourceCode(file, node->son[0], 1);
 					fprintf(file, ") then ");
 					astToSourceCode(file, node->son[1], 1);
-					//fprintf(file, "}");
 					break;
 			case AST_IFELSE: fprintf(file, "if(");
 					astToSourceCode(file, node->son[0], 1);
@@ -203,13 +202,11 @@ void astToSourceCode(FILE* file, AST* node, int firstParamOrArg){
 					astToSourceCode(file, node->son[1], 1);
 					fprintf(file, "else ");
 					astToSourceCode(file, node->son[2], 1);
-					//fprintf(file, "}");
 					break;
 			case AST_WHILE: fprintf(file, "while(");
 					astToSourceCode(file, node->son[0], 1);
 					fprintf(file, ")");
 					astToSourceCode(file, node->son[1], 1);
-					//fprintf(file, "}");
 					break;
 			case AST_BREAK: fprintf(file, "break");
 					break;
@@ -221,7 +218,6 @@ void astToSourceCode(FILE* file, AST* node, int firstParamOrArg){
 					astToSourceCode(file, node->son[2], 1);
 					fprintf(file, ")");
 					astToSourceCode(file, node->son[3], 1);
-					//fprintf(file, "}");
 					break;
 			case AST_VECTINIT: fprintf(file, ": ");
 					astToSourceCode(file, node->son[0], 1); // print list of literals
@@ -256,7 +252,7 @@ void astToSourceCode(FILE* file, AST* node, int firstParamOrArg){
 					break;
 			case AST_BLOCK: fprintf(file, "{\n");
 					astToSourceCode(file, node->son[0], 1);
-					fprintf(file, "}\n");
+					fprintf(file, "}");
 			default: break;
 		}
 	}

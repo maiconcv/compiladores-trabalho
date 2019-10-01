@@ -80,6 +80,11 @@ FILE* output = NULL;
 %left '<' '>' OPERATOR_LE OPERATOR_GE OPERATOR_EQ OPERATOR_DIF
 %left '+' '-'
 %left '*' '/'
+%left KW_THEN
+%left KW_ELSE
+%left TK_IDENTIFIER
+%left '('
+%left '['
 
 %%
 
