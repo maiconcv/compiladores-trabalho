@@ -89,7 +89,7 @@ FILE* output = NULL;
 
 %%
 
-begin: programa					{ astPrint($1, 0); astToSourceCode(output, $1, 1); checkAndSetTypes($1); checkUndeclared(); fprintf(stderr, "%d semantic errors.\n", getSemanticErrors()); }
+begin: programa					{ astPrint($1, 0); astToSourceCode(output, $1, 1); checkAndSetTypes($1); checkUndeclared(); checkOperands($1); fprintf(stderr, "%d semantic errors.\n", getSemanticErrors()); }
 	;
 
 programa: programa decl				{ $$ = astCreate(AST_LDECL, 0, $1, $2, 0, 0); }

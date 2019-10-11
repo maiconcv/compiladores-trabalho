@@ -45,3 +45,38 @@ void checkUndeclared(void){
 int getSemanticErrors(void){
 	return semanticError;
 }
+
+void checkOperands(AST* node){
+	if(!node)
+		return;
+
+	switch(node->type){
+		case AST_ADD:
+		case AST_SUB:
+		case AST_MUL:
+		case AST_DIV: // check correctness of the two operands
+			for(int i = 0; i < 2; i++){
+				if(node->son[i]->type == AST_ADD ||
+				   node->son[i]->type == AST_SUB ||
+				   node->son[i]->type == AST_MUL ||
+				   node->son[i]->type == AST_DIV ||
+				   (node->son[i]->type == AST_SYMBOL &&
+				    node->son[i]->symbol->type == SYMBOL_SCALAR &&
+				    node->son[i]->symbol->datatype != DATATYPE_BOOL) ||
+				   (node->son[i]->type == AST_SYMBOL &&
+				    (node->son[i]->symbol->type == SYMBOL_LITINT ||
+				     node->son[i]->symbol->type == SYMBOL_LITREAL)))
+					;
+				else{
+					fprintf(stderr, "Semantic ERROR: Operands not compatible.\n");
+					semanticError++;
+				}
+			}
+			break;
+		default:
+			break;
+	}
+
+	for(int i = 0; i < MAX_SONS; i++)
+		checkOperands(node->son[i]);
+}

@@ -5,7 +5,7 @@ int x = 200;
 
 int func(int x, int y){
 x = 56;
-y = 78+2+x+y+a;
+y = 78+2+x+y*5-10/2+a;
 }
 
 int funcaodois()
