@@ -1,0 +1,18 @@
+int x = 10;
+int y = 20;
+int k = 666;
+int x = 200;
+
+int func(int x, int y){
+x = 56;
+y = 78+2+x+y+a;
+}
+
+int funcaodois()
+k=6.66
+
+int funcvazia() {    }
+
+int funccmdvaz() {  ; ;  ; }
+
+int func(){ }
