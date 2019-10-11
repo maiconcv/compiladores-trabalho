@@ -17,14 +17,20 @@ int hashAddress(char* text){
 }
 
 HASH_NODE* hashFind(char* text){
-	return NULL;
+	int address = hashAddress(text);
+	for(HASH_NODE* node = Table[address]; node; node = node->next)
+		if(!strcmp(text, node->text))
+			return node;
+	return 0;
 }
 
-HASH_NODE* hashInsert(char* text){
+HASH_NODE* hashInsert(char* text, int type){
 	HASH_NODE* newnode;
+	if((newnode = hashFind(text)) != 0)
+		return newnode;
 	int address = hashAddress(text);
 	newnode = (HASH_NODE*)calloc(1, sizeof(HASH_NODE));
-	newnode->type = 1;
+	newnode->type = type;
 	newnode->text = (char*)calloc(strlen(text) + 1, sizeof(char));
 	strcpy(newnode->text, text);
 	newnode->next = Table[address];
