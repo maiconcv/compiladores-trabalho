@@ -15,8 +15,19 @@
 #define SYMBOL_LITCHAR 6
 #define SYMBOL_LITSTRING 7
 
+#define SYMBOL_SCALAR 8
+#define SYMBOL_VECTOR 9
+#define SYMBOL_FUNCTION 10
+
+#define DATATYPE_BYTE 1
+#define DATATYPE_INT 2
+#define DATATYPE_LONG 3
+#define DATATYPE_FLOAT 4
+#define DATATYPE_BOOL 5
+
 typedef struct hash_node {
 	int type;
+	int datatype;
 	char* text;
 	struct hash_node* next;
 } HASH_NODE;
@@ -26,5 +37,6 @@ int hashAddress(char* text);
 HASH_NODE* hashFind(char* text);
 HASH_NODE* hashInsert(char* text, int type);
 void hashPrint(void);
+int hashCheckUndeclared(void);
 
 #endif // COMP_HASH_H

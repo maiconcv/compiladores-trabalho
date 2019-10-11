@@ -7,8 +7,8 @@
 # and #include "main.c" in the last part of the scanner.l
 #
 
-etapa4: y.tab.o lex.yy.o main.o hash.o astree.o
-	gcc -o etapa4 y.tab.o lex.yy.o main.o hash.o astree.o -Wall
+etapa4: y.tab.o lex.yy.o main.o hash.o astree.o semantic.o
+	gcc -o etapa4 y.tab.o lex.yy.o main.o hash.o astree.o semantic.o -Wall
 
 y.tab.o: y.tab.c
 	gcc -c y.tab.c -Wall
@@ -24,6 +24,9 @@ hash.o: hash.c
 
 astree.o: astree.c
 	gcc -c astree.c -Wall
+
+semantic.o: semantic.c
+	gcc -c semantic.c -Wall
 
 lex.yy.c: scanner.l
 	lex --header-file=lex.yy.h scanner.l

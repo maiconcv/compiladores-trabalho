@@ -6,6 +6,7 @@
 #include "lex.yy.h"
 #include "hash.h"
 #include "astree.h"
+#include "semantic.h"
 
 int yyerror(const char* msg);
 int getLineNumber(void);
@@ -88,7 +89,7 @@ FILE* output = NULL;
 
 %%
 
-begin: programa					{ astPrint($1, 0); astToSourceCode(output, $1, 1); }
+begin: programa					{ astPrint($1, 0); astToSourceCode(output, $1, 1); checkAndSetTypes($1); checkUndeclared(); fprintf(stderr, "%d semantic errors.\n", getSemanticErrors()); }
 	;
 
 programa: programa decl				{ $$ = astCreate(AST_LDECL, 0, $1, $2, 0, 0); }
