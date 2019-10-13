@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "hash.h"
+#include "semantic.h"
 
 void initMe(void);
 int yyparse();
@@ -30,6 +31,8 @@ int main(int argc, char** argv){
 	outputFile(output);
 	yyparse();
 	hashPrint();
+	if(getSemanticErrors() > 0)
+		exit(4);
 	fprintf(stderr, "Good job!\n");
 	exit(0);
 }

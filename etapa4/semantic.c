@@ -77,6 +77,37 @@ void checkOperands(AST* node){
 				}
 			}
 			break;
+		case AST_LT:
+		case AST_GT:
+		case AST_LE:
+		case AST_GE:
+			break;
+		case AST_EQ:
+		case AST_DIF:
+			break;
+		case AST_AND:
+		case AST_OR:
+		case AST_NOT:
+			for(int i = 0; i < 2; i++){
+				if(node->type == AST_AND || node->type == AST_OR || (node->type == AST_NOT && i == 0)){
+					if(node->son[i]->type == AST_AND ||
+					   node->son[i]->type == AST_OR ||
+					   node->son[i]->type == AST_NOT ||
+					   (node->son[i]->type == AST_SYMBOL &&
+					    node->son[i]->symbol->type == SYMBOL_SCALAR &&
+					    node->son[i]->symbol->datatype == DATATYPE_BOOL) ||
+					   (node->son[i]->type == AST_VECTREAD &&
+					    node->son[i]->symbol->datatype == DATATYPE_BOOL) ||
+					   (node->son[i]->type == AST_FUNCALL &&
+					    node->son[i]->symbol->datatype == DATATYPE_BOOL))
+						;
+					else{
+						fprintf(stderr, "Semantic ERROR: Operands not compatible.\n");
+						semanticError++;
+					}
+				}
+			}
+			break;
 		default:
 			break;
 	}
