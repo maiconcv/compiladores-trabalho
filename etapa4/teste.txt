@@ -1,10 +1,11 @@
 int x = 10;
 int y = 20;
 int k = 666;
+int v1[2]: 0 0;
 
 int func(int x, int y){
 x = 56;
-y = 78+2+x+y;
+y = 78+2+x+y+v1[0]+funcvazia();
 }
 
 int funcaodois()

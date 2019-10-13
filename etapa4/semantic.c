@@ -65,7 +65,11 @@ void checkOperands(AST* node){
 				    node->son[i]->symbol->datatype != DATATYPE_BOOL) ||
 				   (node->son[i]->type == AST_SYMBOL &&
 				    (node->son[i]->symbol->type == SYMBOL_LITINT ||
-				     node->son[i]->symbol->type == SYMBOL_LITREAL)))
+				     node->son[i]->symbol->type == SYMBOL_LITREAL)) ||
+				   (node->son[i]->type == AST_VECTREAD &&
+				    node->son[i]->symbol->datatype != DATATYPE_BOOL) ||
+				   (node->son[i]->type == AST_FUNCALL &&
+				    node->son[i]->symbol->datatype != DATATYPE_BOOL))
 					;
 				else{
 					fprintf(stderr, "Semantic ERROR: Operands not compatible.\n");
