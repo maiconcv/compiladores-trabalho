@@ -36,18 +36,18 @@ DIGIT [0-9]
 "=="				return OPERATOR_EQ;
 "!="				return OPERATOR_DIF;
 
-{DIGIT}+			{ yylval.symbol = hashInsert(yytext, SYMBOL_LITINT); return LIT_INTEGER; }
-{DIGIT}+"."{DIGIT}+		{ yylval.symbol = hashInsert(yytext, SYMBOL_LITREAL); return LIT_FLOAT; }
-"."{DIGIT}+			{ yylval.symbol = hashInsert(yytext, SYMBOL_LITREAL); return LIT_FLOAT; }
-{DIGIT}+"."			{ yylval.symbol = hashInsert(yytext, SYMBOL_LITREAL); return LIT_FLOAT; }
-"TRUE"				{ yylval.symbol = hashInsert(yytext, SYMBOL_LITTRUE); return LIT_TRUE; }
-"FALSE"				{ yylval.symbol = hashInsert(yytext, SYMBOL_LITFALSE); return LIT_FALSE; }
-\'.\'				{ yylval.symbol = hashInsert(yytext, SYMBOL_LITCHAR); return LIT_CHAR; }
-\"(\\.|[^"])*\"			{ yylval.symbol = hashInsert(yytext, SYMBOL_LITSTRING); return LIT_STRING; }
+{DIGIT}+			{ yylval.symbol = hashInsert(yytext, SYMBOL_LITINT, lineNumber); return LIT_INTEGER; }
+{DIGIT}+"."{DIGIT}+		{ yylval.symbol = hashInsert(yytext, SYMBOL_LITREAL, lineNumber); return LIT_FLOAT; }
+"."{DIGIT}+			{ yylval.symbol = hashInsert(yytext, SYMBOL_LITREAL, lineNumber); return LIT_FLOAT; }
+{DIGIT}+"."			{ yylval.symbol = hashInsert(yytext, SYMBOL_LITREAL, lineNumber); return LIT_FLOAT; }
+"TRUE"				{ yylval.symbol = hashInsert(yytext, SYMBOL_LITTRUE, lineNumber); return LIT_TRUE; }
+"FALSE"				{ yylval.symbol = hashInsert(yytext, SYMBOL_LITFALSE, lineNumber); return LIT_FALSE; }
+\'.\'				{ yylval.symbol = hashInsert(yytext, SYMBOL_LITCHAR, lineNumber); return LIT_CHAR; }
+\"(\\.|[^"])*\"			{ yylval.symbol = hashInsert(yytext, SYMBOL_LITSTRING, lineNumber); return LIT_STRING; }
 
 [,;:()\[\]{}+\-*/<>=v.~&$#]	return yytext[0];
 
-[A-Za-z_][A-Za-z_0-9]*		{ yylval.symbol = hashInsert(yytext, SYMBOL_IDENTIFIER); return TK_IDENTIFIER; }
+[A-Za-z_][A-Za-z_0-9]*		{ yylval.symbol = hashInsert(yytext, SYMBOL_IDENTIFIER, lineNumber); return TK_IDENTIFIER; }
 
 [ \t]
 "\n"				lineNumber++;

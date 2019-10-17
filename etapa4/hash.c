@@ -24,13 +24,14 @@ HASH_NODE* hashFind(char* text){
 	return 0;
 }
 
-HASH_NODE* hashInsert(char* text, int type){
+HASH_NODE* hashInsert(char* text, int type, int line){
 	HASH_NODE* newnode;
 	if((newnode = hashFind(text)) != 0)
 		return newnode;
 	int address = hashAddress(text);
 	newnode = (HASH_NODE*)calloc(1, sizeof(HASH_NODE));
 	newnode->type = type;
+	newnode->line = line;
 	newnode->text = (char*)calloc(strlen(text) + 1, sizeof(char));
 	strcpy(newnode->text, text);
 	newnode->next = Table[address];
@@ -53,7 +54,7 @@ int hashCheckUndeclared(void){
 	for(int i = 0; i < HASH_SIZE; ++i){
 		for(node = Table[i]; node; node = node->next){
 			if(node->type == SYMBOL_IDENTIFIER){
-				fprintf(stderr, "Semantic ERROR: Symbol %s undeclared.\n", node->text);
+				fprintf(stderr, "Semantic ERROR: Symbol %s undeclared at line %d.\n", node->text, node->line);
 				errors++;
 			}
 		}

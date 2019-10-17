@@ -28,6 +28,7 @@
 typedef struct hash_node {
 	int type;
 	int datatype;
+	int line;
 	char* text;
 	struct hash_node* next;
 } HASH_NODE;
@@ -35,7 +36,7 @@ typedef struct hash_node {
 void hashInit(void);
 int hashAddress(char* text);
 HASH_NODE* hashFind(char* text);
-HASH_NODE* hashInsert(char* text, int type);
+HASH_NODE* hashInsert(char* text, int type, int line);
 void hashPrint(void);
 int hashCheckUndeclared(void);
 
