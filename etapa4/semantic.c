@@ -9,7 +9,7 @@ void checkAndSetTypes(AST* node){
 	// take all declaration nodes
 	if(node->type == AST_VARDECL || node->type == AST_VECTDECL || node->type == AST_FUNDECL){
 		if(node->symbol && node->symbol->type != SYMBOL_IDENTIFIER){
-			fprintf(stderr, "Semantic ERROR: Symbol %s already declared.\n", node->symbol->text);
+			fprintf(stderr, "Semantic ERROR: Symbol %s already declared at line %d.\n", node->symbol->text, node->line);
 			semanticError++;
 		}
 
@@ -72,7 +72,7 @@ void checkOperands(AST* node){
 				    node->son[i]->symbol->datatype != DATATYPE_BOOL))
 					;
 				else{
-					fprintf(stderr, "Semantic ERROR: Operands not compatible.\n");
+					fprintf(stderr, "Semantic ERROR: Operands not compatible at line %d.\n", node->line);
 					semanticError++;
 				}
 			}
@@ -102,7 +102,7 @@ void checkOperands(AST* node){
 					    node->son[i]->symbol->datatype == DATATYPE_BOOL))
 						;
 					else{
-						fprintf(stderr, "Semantic ERROR: Operands not compatible.\n");
+						fprintf(stderr, "Semantic ERROR: Operands not compatible at line %d.\n", node->line);
 						semanticError++;
 					}
 				}
