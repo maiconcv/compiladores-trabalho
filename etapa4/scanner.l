@@ -40,8 +40,8 @@ DIGIT [0-9]
 {DIGIT}+"."{DIGIT}+		{ yylval.symbol = hashInsert(yytext, SYMBOL_LITREAL, lineNumber); return LIT_FLOAT; }
 "."{DIGIT}+			{ yylval.symbol = hashInsert(yytext, SYMBOL_LITREAL, lineNumber); return LIT_FLOAT; }
 {DIGIT}+"."			{ yylval.symbol = hashInsert(yytext, SYMBOL_LITREAL, lineNumber); return LIT_FLOAT; }
-"TRUE"				{ yylval.symbol = hashInsert(yytext, SYMBOL_LITTRUE, lineNumber); return LIT_TRUE; }
-"FALSE"				{ yylval.symbol = hashInsert(yytext, SYMBOL_LITFALSE, lineNumber); return LIT_FALSE; }
+"TRUE"				{ yylval.symbol = hashInsert(yytext, SYMBOL_LITBOOL, lineNumber); return LIT_TRUE; }
+"FALSE"				{ yylval.symbol = hashInsert(yytext, SYMBOL_LITBOOL, lineNumber); return LIT_FALSE; }
 \'.\'				{ yylval.symbol = hashInsert(yytext, SYMBOL_LITCHAR, lineNumber); return LIT_CHAR; }
 \"(\\.|[^"])*\"			{ yylval.symbol = hashInsert(yytext, SYMBOL_LITSTRING, lineNumber); return LIT_STRING; }
 

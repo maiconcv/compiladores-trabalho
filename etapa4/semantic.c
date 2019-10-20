@@ -99,8 +99,7 @@ void checkOperands(AST* node){
 					    node->son[i]->symbol->type == SYMBOL_SCALAR &&
 					    node->son[i]->symbol->datatype == DATATYPE_BOOL) ||
 					   (node->son[i]->type == AST_SYMBOL &&
-					    (node->son[i]->symbol->type == SYMBOL_LITTRUE ||
-					     node->son[i]->symbol->type == SYMBOL_LITFALSE)) ||
+					    node->son[i]->symbol->type == SYMBOL_LITBOOL) ||
 					   (node->son[i]->type == AST_VECTREAD &&
 					    node->son[i]->symbol->datatype == DATATYPE_BOOL) ||
 					   (node->son[i]->type == AST_FUNCALL &&
@@ -134,8 +133,7 @@ int checkBracketsType(AST* node, int expectedType){
 			   (node->symbol->type == SYMBOL_SCALAR &&
 			    node->symbol->datatype != DATATYPE_BOOL))
 				return TYPE_NUMERIC;
-			else if(node->symbol->type == SYMBOL_LITTRUE ||
-				node->symbol->type == SYMBOL_LITFALSE ||
+			else if(node->symbol->type == SYMBOL_LITBOOL ||
 				(node->symbol->type == SYMBOL_SCALAR &&
 				 node->symbol->datatype == DATATYPE_BOOL))
 				return TYPE_BOOLEAN;
