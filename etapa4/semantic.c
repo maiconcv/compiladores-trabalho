@@ -69,10 +69,12 @@ void checkOperands(AST* node){
 				   (node->son[i]->type == AST_VECTREAD &&
 				    node->son[i]->symbol->datatype != DATATYPE_BOOL) ||
 				   (node->son[i]->type == AST_FUNCALL &&
-				    node->son[i]->symbol->datatype != DATATYPE_BOOL))
+				    node->son[i]->symbol->datatype != DATATYPE_BOOL) ||
+				   (node->son[i]->type == AST_BRACKETS &&
+				    checkBracketsType(node->son[i], TYPE_NUMERIC) == TYPE_NUMERIC))
 					;
 				else{
-					fprintf(stderr, "Semantic ERROR: Operands not compatible at line %d.\n", node->line);
+					fprintf(stderr, "Semantic ERROR: Operands not compatible at line %d. Expecting only numeric operands.\n", node->line);
 					semanticError++;
 				}
 			}
@@ -96,10 +98,15 @@ void checkOperands(AST* node){
 					   (node->son[i]->type == AST_SYMBOL &&
 					    node->son[i]->symbol->type == SYMBOL_SCALAR &&
 					    node->son[i]->symbol->datatype == DATATYPE_BOOL) ||
+					   (node->son[i]->type == AST_SYMBOL &&
+					    (node->son[i]->symbol->type == SYMBOL_LITTRUE ||
+					     node->son[i]->symbol->type == SYMBOL_LITFALSE)) ||
 					   (node->son[i]->type == AST_VECTREAD &&
 					    node->son[i]->symbol->datatype == DATATYPE_BOOL) ||
 					   (node->son[i]->type == AST_FUNCALL &&
-					    node->son[i]->symbol->datatype == DATATYPE_BOOL))
+					    node->son[i]->symbol->datatype == DATATYPE_BOOL) ||
+					   (node->son[i]->type == AST_BRACKETS &&
+					    checkBracketsType(node->son[i], TYPE_BOOLEAN) == TYPE_BOOLEAN))
 						;
 					else{
 						fprintf(stderr, "Semantic ERROR: Operands not compatible at line %d.\n", node->line);
@@ -114,4 +121,70 @@ void checkOperands(AST* node){
 
 	for(int i = 0; i < MAX_SONS; i++)
 		checkOperands(node->son[i]);
+}
+
+int checkBracketsType(AST* node, int expectedType){
+	if(!node)
+		return expectedType;
+
+	switch(node->type){
+		case AST_SYMBOL:
+			if(node->symbol->type == SYMBOL_LITINT ||
+			   node->symbol->type == SYMBOL_LITREAL ||
+			   (node->symbol->type == SYMBOL_SCALAR &&
+			    node->symbol->datatype != DATATYPE_BOOL))
+				return TYPE_NUMERIC;
+			else if(node->symbol->type == SYMBOL_LITTRUE ||
+				node->symbol->type == SYMBOL_LITFALSE ||
+				(node->symbol->type == SYMBOL_SCALAR &&
+				 node->symbol->datatype == DATATYPE_BOOL))
+				return TYPE_BOOLEAN;
+			else
+				return TYPE_ERROR;
+			break;
+		case AST_VECTREAD:
+		case AST_FUNCALL:
+			if(node->symbol->datatype != DATATYPE_BOOL)
+				return TYPE_NUMERIC;
+			else if(node->symbol->datatype == DATATYPE_BOOL)
+				return TYPE_BOOLEAN;
+			else
+				return TYPE_ERROR;
+			break;
+		case AST_ADD:
+		case AST_SUB:
+		case AST_MUL:
+		case AST_DIV:
+			if(expectedType == TYPE_NUMERIC &&
+			   checkBracketsType(node->son[0], expectedType) == TYPE_NUMERIC &&
+			   checkBracketsType(node->son[1], expectedType) == TYPE_NUMERIC)
+				return TYPE_NUMERIC;
+			else
+				return TYPE_ERROR;
+			break;
+		case AST_AND:
+		case AST_OR:
+		case AST_NOT:
+			if(expectedType == TYPE_BOOLEAN &&
+			   checkBracketsType(node->son[0], expectedType) == TYPE_BOOLEAN &&
+			   checkBracketsType(node->son[1], expectedType) == TYPE_BOOLEAN)
+				return TYPE_BOOLEAN;
+			else
+				return TYPE_ERROR;
+			break;
+		case AST_LT:
+		case AST_GT:
+		case AST_LE:
+		case AST_GE:
+			break;
+		case AST_EQ:
+		case AST_DIF:
+			break;
+		case AST_BRACKETS:
+				return checkBracketsType(node->son[0], expectedType);
+			break;
+		default:
+			break;
+	}
+	return TYPE_ERROR;
 }
