@@ -55,21 +55,26 @@ void checkOperands(AST* node){
 		case AST_SUB:
 		case AST_MUL:
 		case AST_DIV: // check correctness of the two operands
-			for(int i = 0; i < 2; i++){
+			for(int i = 0; i < 2; i++){ // x = (x * 5)+ y => AST_ASSIGN (AST_ADD(x, y, 0, 0))
 				if(node->son[i]->type == AST_ADD ||
 				   node->son[i]->type == AST_SUB ||
 				   node->son[i]->type == AST_MUL ||
 				   node->son[i]->type == AST_DIV ||
+
 				   (node->son[i]->type == AST_SYMBOL &&
 				    node->son[i]->symbol->type == SYMBOL_SCALAR &&
 				    node->son[i]->symbol->datatype != DATATYPE_BOOL) ||
+
 				   (node->son[i]->type == AST_SYMBOL &&
 				    (node->son[i]->symbol->type == SYMBOL_LITINT ||
 				     node->son[i]->symbol->type == SYMBOL_LITREAL)) ||
+
 				   (node->son[i]->type == AST_VECTREAD &&
 				    node->son[i]->symbol->datatype != DATATYPE_BOOL) ||
+
 				   (node->son[i]->type == AST_FUNCALL &&
 				    node->son[i]->symbol->datatype != DATATYPE_BOOL) ||
+
 				   (node->son[i]->type == AST_BRACKETS &&
 				    checkBracketsType(node->son[i], TYPE_NUMERIC) == TYPE_NUMERIC))
 					;
@@ -83,9 +88,44 @@ void checkOperands(AST* node){
 		case AST_GT:
 		case AST_LE:
 		case AST_GE:
+			for(int i = 0; i < 2; i++){
+				if(node->son[i]->type == AST_ADD ||
+				   node->son[i]->type == AST_SUB ||
+			   	   node->son[i]->type == AST_MUL ||
+			   	   node->son[i]->type == AST_DIV ||
+
+			   	   (node->son[i]->type == AST_SYMBOL &&
+				    node->son[i]->symbol->type == SYMBOL_SCALAR &&
+			    	    node->son[i]->symbol->datatype != DATATYPE_BOOL) ||
+
+			    	   (node->son[i]->type == AST_SYMBOL &&
+				    (node->son[i]->symbol->type == SYMBOL_LITINT ||
+			    	     node->son[i]->symbol->type == SYMBOL_LITREAL)) ||
+
+			     	   (node->son[i]->type == AST_VECTREAD &&
+				    node->son[i]->symbol->datatype != DATATYPE_BOOL) ||
+
+			    	   (node->son[i]->type == AST_FUNCALL &&
+				    node->son[i]->symbol->datatype != DATATYPE_BOOL) ||
+
+			    	   (node->son[i]->type == AST_BRACKETS &&
+				    checkBracketsType(node->son[i], TYPE_NUMERIC) == TYPE_NUMERIC))
+					;
+				else{
+					fprintf(stderr, "Semantic ERROR: Operands not compatible at line %d.\n", node->line);
+					semanticError++;
+				}
+			}
 			break;
 		case AST_EQ:
 		case AST_DIF:
+			if(checkBracketsType(node->son[0], TYPE_NUMERIC) == checkBracketsType(node->son[1], TYPE_NUMERIC) ||
+			   checkBracketsType(node->son[0], TYPE_BOOLEAN) == checkBracketsType(node->son[1], TYPE_BOOLEAN))
+				;
+			else{
+				fprintf(stderr, "Semantic ERROR: Operands not compatible at line %d.\n", node->line);
+				semanticError++;
+			}
 			break;
 		case AST_AND:
 		case AST_OR:
@@ -95,15 +135,20 @@ void checkOperands(AST* node){
 					if(node->son[i]->type == AST_AND ||
 					   node->son[i]->type == AST_OR ||
 					   node->son[i]->type == AST_NOT ||
+
 					   (node->son[i]->type == AST_SYMBOL &&
 					    node->son[i]->symbol->type == SYMBOL_SCALAR &&
 					    node->son[i]->symbol->datatype == DATATYPE_BOOL) ||
+
 					   (node->son[i]->type == AST_SYMBOL &&
 					    node->son[i]->symbol->type == SYMBOL_LITBOOL) ||
+
 					   (node->son[i]->type == AST_VECTREAD &&
 					    node->son[i]->symbol->datatype == DATATYPE_BOOL) ||
+
 					   (node->son[i]->type == AST_FUNCALL &&
 					    node->son[i]->symbol->datatype == DATATYPE_BOOL) ||
+
 					   (node->son[i]->type == AST_BRACKETS &&
 					    checkBracketsType(node->son[i], TYPE_BOOLEAN) == TYPE_BOOLEAN))
 						;
@@ -174,9 +219,25 @@ int checkBracketsType(AST* node, int expectedType){
 		case AST_GT:
 		case AST_LE:
 		case AST_GE:
+			if(expectedType == TYPE_BOOLEAN &&
+		   	   checkBracketsType(node->son[0], expectedType) == TYPE_NUMERIC &&
+		   	   checkBracketsType(node->son[1], expectedType) == TYPE_NUMERIC)
+				return TYPE_BOOLEAN;
+			else
+				return TYPE_ERROR;
 			break;
 		case AST_EQ:
 		case AST_DIF:
+			if(expectedType == TYPE_BOOLEAN &&
+		   	   checkBracketsType(node->son[0], expectedType) == TYPE_BOOLEAN &&
+		   	   checkBracketsType(node->son[1], expectedType) == TYPE_BOOLEAN)
+			   	return TYPE_BOOLEAN;
+			else if(expectedType == TYPE_NUMERIC &&
+		   	   	checkBracketsType(node->son[0], expectedType) == TYPE_NUMERIC &&
+		   	   	checkBracketsType(node->son[1], expectedType) == TYPE_NUMERIC)
+				return TYPE_NUMERIC;
+			else
+				return TYPE_ERROR;
 			break;
 		case AST_BRACKETS:
 				return checkBracketsType(node->son[0], expectedType);
