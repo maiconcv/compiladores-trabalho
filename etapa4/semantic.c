@@ -55,7 +55,7 @@ void checkOperands(AST* node){
 		case AST_SUB:
 		case AST_MUL:
 		case AST_DIV: // check correctness of the two operands
-			for(int i = 0; i < 2; i++){ // x = (x * 5)+ y => AST_ASSIGN (AST_ADD(x, y, 0, 0))
+			for(int i = 0; i < 2; i++){
 				if(node->son[i]->type == AST_ADD ||
 				   node->son[i]->type == AST_SUB ||
 				   node->son[i]->type == AST_MUL ||
@@ -119,8 +119,11 @@ void checkOperands(AST* node){
 			break;
 		case AST_EQ:
 		case AST_DIF:
-			if(checkBracketsType(node->son[0], TYPE_NUMERIC) == checkBracketsType(node->son[1], TYPE_NUMERIC) ||
-			   checkBracketsType(node->son[0], TYPE_BOOLEAN) == checkBracketsType(node->son[1], TYPE_BOOLEAN))
+			if((checkBracketsType(node->son[0], TYPE_NUMERIC) == TYPE_NUMERIC &&
+			    checkBracketsType(node->son[1], TYPE_NUMERIC) == TYPE_NUMERIC) ||
+
+			   (checkBracketsType(node->son[0], TYPE_BOOLEAN) == TYPE_BOOLEAN &&
+			    checkBracketsType(node->son[1], TYPE_BOOLEAN) == TYPE_BOOLEAN))
 				;
 			else{
 				fprintf(stderr, "Semantic ERROR: Operands not compatible at line %d.\n", node->line);
@@ -157,6 +160,42 @@ void checkOperands(AST* node){
 						semanticError++;
 					}
 				}
+			}
+			break;
+		case AST_ASSIGN:
+			if((node->symbol->datatype != DATATYPE_BOOL &&
+			    checkBracketsType(node->son[0], TYPE_NUMERIC) == TYPE_NUMERIC) ||
+
+			   (node->symbol->datatype == DATATYPE_BOOL &&
+		   	    checkBracketsType(node->son[0], TYPE_BOOLEAN) == TYPE_BOOLEAN))
+				;
+			else{
+				fprintf(stderr, "Semantic ERROR: Operands not compatible at line %d.\n", node->line);
+				semanticError++;
+			}
+			break;
+		case AST_VECTASSIGN:
+			if(!(checkBracketsType(node->son[0], TYPE_NUMERIC) == TYPE_NUMERIC))
+			{
+				fprintf(stderr, "Semantic ERROR: Vector index must be a numeric type at line %d.\n", node->line);
+				semanticError++;
+			}
+			if((node->symbol->datatype != DATATYPE_BOOL &&
+			    checkBracketsType(node->son[1], TYPE_NUMERIC) == TYPE_NUMERIC) ||
+
+			   (node->symbol->datatype == DATATYPE_BOOL &&
+		   	    checkBracketsType(node->son[1], TYPE_BOOLEAN) == TYPE_BOOLEAN))
+				;
+			else{
+				fprintf(stderr, "Semantic ERROR: Operands not compatible at line %d.\n", node->line);
+				semanticError++;
+			}
+			break;
+		case AST_VECTREAD:
+			if(!(checkBracketsType(node->son[0], TYPE_NUMERIC) == TYPE_NUMERIC))
+			{
+				fprintf(stderr, "Semantic ERROR: Vector index must be a numeric type at line %d.\n", node->line);
+				semanticError++;
 			}
 			break;
 		default:
@@ -198,7 +237,7 @@ int checkBracketsType(AST* node, int expectedType){
 		case AST_SUB:
 		case AST_MUL:
 		case AST_DIV:
-			if(expectedType == TYPE_NUMERIC &&
+			if(/*expectedType == TYPE_NUMERIC &&*/
 			   checkBracketsType(node->son[0], expectedType) == TYPE_NUMERIC &&
 			   checkBracketsType(node->son[1], expectedType) == TYPE_NUMERIC)
 				return TYPE_NUMERIC;
@@ -232,10 +271,10 @@ int checkBracketsType(AST* node, int expectedType){
 		   	   checkBracketsType(node->son[0], expectedType) == TYPE_BOOLEAN &&
 		   	   checkBracketsType(node->son[1], expectedType) == TYPE_BOOLEAN)
 			   	return TYPE_BOOLEAN;
-			else if(expectedType == TYPE_NUMERIC &&
+			else if(expectedType == TYPE_BOOLEAN &&
 		   	   	checkBracketsType(node->son[0], expectedType) == TYPE_NUMERIC &&
 		   	   	checkBracketsType(node->son[1], expectedType) == TYPE_NUMERIC)
-				return TYPE_NUMERIC;
+				return TYPE_BOOLEAN;
 			else
 				return TYPE_ERROR;
 			break;

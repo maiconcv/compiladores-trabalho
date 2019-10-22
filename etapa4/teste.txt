@@ -12,11 +12,19 @@ b = ~b . vb[0] v funcbool();
 y = 5 + (6 * x / funcvazia());
 b = TRUE . FALSE v (~b . vb[1]);
 x = (5 * (x + 1)) / (y - 3);
-x = (x * (y + 4 / 8)) <= (x*y);
+x = (x * (y + 4 / 8)) / (x*y);
 b = TRUE . (5 < x) v (b v ~(y >= x));
 vb[0] = ~FALSE . (x < 0);
 b = TRUE != (~b . (TRUE v (x > 5)));
-b = FALSE . (5 == x);
+vb[0] = b != FALSE;
+b = TRUE v (TRUE != b);
+b = (FALSE v (x <= (5 * y))) . ((5 + (y / 2)) == (x * 5 - 4));
+x = 5;
+b = FALSE . (5 <= (x * y));
+vb[x + 5] = TRUE;
+v1[(x + (y * (5 / 2)))] = (x * (y + 4 / 8)) / (x*y);
+x = v1[8];
+x = func();
 }
 
 int funcaodois()
