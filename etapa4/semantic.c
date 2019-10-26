@@ -205,7 +205,18 @@ void checkOperands(AST* node){
 			    checkBracketsType(node->son[1], TYPE_BOOLEAN) == TYPE_BOOLEAN))
 			   	;
 			else{
-				fprintf(stderr, "Semantic ERROR: Init value for %s variable is not compatible to its type at line %d.\n", node->symbol->text, node->line);
+				fprintf(stderr, "Semantic ERROR: Init value for %s variable is not compatible with its type at line %d.\n", node->symbol->text, node->line);
+				semanticError++;
+			}
+			break;
+		case AST_VECTDECL:
+			if((node->son[0]->type != AST_TYPEBOOL &&
+			    checkBracketsType(node->son[2], TYPE_NUMERIC) == TYPE_NUMERIC) ||
+			   (node->son[0]->type == AST_TYPEBOOL &&
+    			    checkBracketsType(node->son[2], TYPE_BOOLEAN) == TYPE_BOOLEAN))
+			    	;
+			else{
+				fprintf(stderr, "Semantic ERROR: Init values for %s vector are not compatible with its type at line %d.\n", node->symbol->text, node->line);
 				semanticError++;
 			}
 			break;
@@ -291,7 +302,16 @@ int checkBracketsType(AST* node, int expectedType){
 				return TYPE_ERROR;
 			break;
 		case AST_BRACKETS:
-				return checkBracketsType(node->son[0], expectedType);
+			return checkBracketsType(node->son[0], expectedType);
+			break;
+		case AST_VECTINIT:
+			return checkBracketsType(node->son[0], expectedType);
+			break;
+		case AST_LSTLIT:
+			if(checkBracketsType(node->son[0], expectedType) == expectedType)
+				return checkBracketsType(node->son[1], expectedType);
+			else
+				return TYPE_ERROR;
 			break;
 		default:
 			break;

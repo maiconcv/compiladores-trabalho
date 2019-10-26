@@ -8,6 +8,9 @@ long l1 = 5.5;
 float f1 = 10;
 byte s1 = 5.9;
 byte s2 = 's';
+bool vb1[3];
+int v2[5]: 0 0 0 0 0;
+long vl[3]: 0 1.5 'a';
 
 int func(int x, int y){
 x = 56;
