@@ -198,6 +198,17 @@ void checkOperands(AST* node){
 				semanticError++;
 			}
 			break;
+		case AST_VARDECL:
+			if((node->son[0]->type != AST_TYPEBOOL &&
+			    checkBracketsType(node->son[1], TYPE_NUMERIC) == TYPE_NUMERIC) ||
+		   	   (node->son[0]->type == AST_TYPEBOOL &&
+			    checkBracketsType(node->son[1], TYPE_BOOLEAN) == TYPE_BOOLEAN))
+			   	;
+			else{
+				fprintf(stderr, "Semantic ERROR: Init value for %s variable is not compatible to its type at line %d.\n", node->symbol->text, node->line);
+				semanticError++;
+			}
+			break;
 		default:
 			break;
 	}
@@ -214,6 +225,7 @@ int checkBracketsType(AST* node, int expectedType){
 		case AST_SYMBOL:
 			if(node->symbol->type == SYMBOL_LITINT ||
 			   node->symbol->type == SYMBOL_LITREAL ||
+			   node->symbol->type == SYMBOL_LITCHAR ||
 			   (node->symbol->type == SYMBOL_SCALAR &&
 			    node->symbol->datatype != DATATYPE_BOOL))
 				return TYPE_NUMERIC;

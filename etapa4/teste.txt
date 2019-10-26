@@ -4,6 +4,10 @@ int k = 666;
 int v1[2]: 0 0;
 bool b = FALSE;
 bool vb[3]: TRUE TRUE TRUE;
+long l1 = 5.5;
+float f1 = 10;
+byte s1 = 5.9;
+byte s2 = 's';
 
 int func(int x, int y){
 x = 56;
