@@ -177,11 +177,13 @@ void checkOperands(AST* node){
 			}
 			break;
 		case AST_ASSIGN:
-			if((node->symbol->datatype != DATATYPE_BOOL &&
+			if(node->symbol->type == SYMBOL_SCALAR &&
+
+			   ((node->symbol->datatype != DATATYPE_BOOL &&
 			    checkBracketsType(node->son[0], TYPE_NUMERIC) == TYPE_NUMERIC) ||
 
 			   (node->symbol->datatype == DATATYPE_BOOL &&
-		   	    checkBracketsType(node->son[0], TYPE_BOOLEAN) == TYPE_BOOLEAN))
+		   	    checkBracketsType(node->son[0], TYPE_BOOLEAN) == TYPE_BOOLEAN)))
 				;
 			else{
 				fprintf(stderr, "Semantic ERROR: Operands not compatible at line %d.\n", node->line);
@@ -194,11 +196,13 @@ void checkOperands(AST* node){
 				fprintf(stderr, "Semantic ERROR: Vector index must be a numeric type at line %d.\n", node->line);
 				semanticError++;
 			}
-			if((node->symbol->datatype != DATATYPE_BOOL &&
+			if(node->symbol->type == SYMBOL_VECTOR &&
+
+			   ((node->symbol->datatype != DATATYPE_BOOL &&
 			    checkBracketsType(node->son[1], TYPE_NUMERIC) == TYPE_NUMERIC) ||
 
 			   (node->symbol->datatype == DATATYPE_BOOL &&
-		   	    checkBracketsType(node->son[1], TYPE_BOOLEAN) == TYPE_BOOLEAN))
+		   	    checkBracketsType(node->son[1], TYPE_BOOLEAN) == TYPE_BOOLEAN)))
 				;
 			else{
 				fprintf(stderr, "Semantic ERROR: Operands not compatible at line %d.\n", node->line);
