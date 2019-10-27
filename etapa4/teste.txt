@@ -39,6 +39,8 @@ while(TRUE){};
 if(b == TRUE v vb[0] == FALSE) then {} else {};
 for(x:5+'c', 10+'c', '1') {};
 return x;
+read x;
+print "Testando print x= " x " v1[0]=" , v1[0] , " x+func(y,5)=" x+func(y,5);
 }
 
 int funcaodois()

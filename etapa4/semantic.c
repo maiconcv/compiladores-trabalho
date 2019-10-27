@@ -272,7 +272,9 @@ void checkOperands(AST* node){
 		}
 		case AST_SYMBOL:
 			if(checkBracketsType(node, TYPE_NUMERIC) == TYPE_NUMERIC ||
-			   checkBracketsType(node, TYPE_BOOLEAN) == TYPE_BOOLEAN)
+			   checkBracketsType(node, TYPE_BOOLEAN) == TYPE_BOOLEAN ||
+		   	   (node->type == AST_SYMBOL &&
+			    node->symbol->type == SYMBOL_LITSTRING))
 				;
 			else{
 				fprintf(stderr, "Semantic ERROR: Symbol %s not used correctly at line %d.\n", node->symbol->text, node->line);
@@ -328,6 +330,14 @@ void checkOperands(AST* node){
 		case AST_FUNDECL:
 			currentFunDeclName = (char*)malloc(sizeof(node->symbol->text));
 			strcpy(currentFunDeclName, node->symbol->text);
+			break;
+		case AST_READ:
+			if(node->symbol->type == SYMBOL_SCALAR)
+				;
+			else{
+				fprintf(stderr, "Semantic ERROR: Symbol %s is not a varible at line %d.\n", node->symbol->text, node->line);
+				semanticError++;
+			}
 			break;
 		default:
 			break;
