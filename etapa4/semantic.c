@@ -3,6 +3,7 @@
 AST* getRootAST();
 
 int semanticError = 0;
+char* currentFunDeclName = NULL;
 
 void checkAndSetTypes(AST* node){
 	if(!node)
@@ -247,7 +248,7 @@ void checkOperands(AST* node){
 				semanticError++;
 			}
 			break;
-		case AST_FUNCALL:
+		case AST_FUNCALL:{
 			if(node->symbol->type == SYMBOL_FUNCTION)
 				;
 			else{
@@ -268,6 +269,7 @@ void checkOperands(AST* node){
 				}
 			}
 			break;
+		}
 		case AST_SYMBOL:
 			if(checkBracketsType(node, TYPE_NUMERIC) == TYPE_NUMERIC ||
 			   checkBracketsType(node, TYPE_BOOLEAN) == TYPE_BOOLEAN)
@@ -288,7 +290,6 @@ void checkOperands(AST* node){
 			}
 			break;
 		case AST_FOR:
-			fprintf(stderr, "symbol %s, ast type %d symbol type %d datatype %d\n", node->symbol->text, node->type, node->symbol->type, node->symbol->datatype);
 			if(node->symbol->type == SYMBOL_SCALAR &&
 			   node->symbol->datatype != DATATYPE_BOOL)
 				;
@@ -305,6 +306,28 @@ void checkOperands(AST* node){
 				fprintf(stderr, "Semantic ERROR: Operands must be of type numeric at line %d.\n", node->line);
 				semanticError++;
 			}
+			break;
+		case AST_RETURN:{
+			AST* root = getRootAST();
+			AST* fundecl = findFunctionDeclaration(root, currentFunDeclName);
+			if(fundecl == NULL)
+				;
+			else{
+				if((fundecl->son[0]->type != AST_TYPEBOOL &&
+				    checkBracketsType(node->son[0], TYPE_NUMERIC) == TYPE_NUMERIC) ||
+			   	   (fundecl->son[0]->type == AST_TYPEBOOL &&
+				    checkBracketsType(node->son[0], TYPE_BOOLEAN) == TYPE_BOOLEAN))
+				    	;
+				else{
+					fprintf(stderr, "Semantic ERROR: Return expression is not compatible with the type of the function %s at line %d.\n", currentFunDeclName, node->line);
+					semanticError++;
+				}
+			}
+			break;
+		}
+		case AST_FUNDECL:
+			currentFunDeclName = (char*)malloc(sizeof(node->symbol->text));
+			strcpy(currentFunDeclName, node->symbol->text);
 			break;
 		default:
 			break;
