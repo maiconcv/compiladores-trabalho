@@ -69,7 +69,8 @@ void checkOperands(AST* node){
 
 				   (node->son[i]->type == AST_SYMBOL &&
 				    (node->son[i]->symbol->type == SYMBOL_LITINT ||
-				     node->son[i]->symbol->type == SYMBOL_LITREAL)) ||
+				     node->son[i]->symbol->type == SYMBOL_LITREAL ||
+			     	     node->son[i]->symbol->type == SYMBOL_LITCHAR)) ||
 
 				   (node->son[i]->type == AST_VECTREAD &&
 				    node->son[i]->symbol->type == SYMBOL_VECTOR &&
@@ -275,6 +276,36 @@ void checkOperands(AST* node){
 				fprintf(stderr, "Semantic ERROR: Symbol %s not used correctly at line %d.\n", node->symbol->text, node->line);
 				semanticError++;
 			}
+			break;
+		case AST_IF:
+		case AST_IFELSE:
+		case AST_WHILE:
+			if(checkBracketsType(node->son[0], TYPE_BOOLEAN) == TYPE_BOOLEAN)
+				;
+			else{
+				fprintf(stderr, "Semantic ERROR: Test must be a boolean type at line %d.\n", node->line);
+				semanticError++;
+			}
+			break;
+		case AST_FOR:
+			fprintf(stderr, "symbol %s, ast type %d symbol type %d datatype %d\n", node->symbol->text, node->type, node->symbol->type, node->symbol->datatype);
+			if(node->symbol->type == SYMBOL_SCALAR &&
+			   node->symbol->datatype != DATATYPE_BOOL)
+				;
+			else{
+				fprintf(stderr, "Semantic ERROR: Left side of first operand must be a numeric variable at line %d.\n", node->line);
+				semanticError++;
+			}
+
+			if(checkBracketsType(node->son[0], TYPE_NUMERIC) == TYPE_NUMERIC &&
+			   checkBracketsType(node->son[1], TYPE_NUMERIC) == TYPE_NUMERIC &&
+		   	   checkBracketsType(node->son[2], TYPE_NUMERIC) == TYPE_NUMERIC)
+			   	;
+			else{
+				fprintf(stderr, "Semantic ERROR: Operands must be of type numeric at line %d.\n", node->line);
+				semanticError++;
+			}
+			break;
 		default:
 			break;
 	}
