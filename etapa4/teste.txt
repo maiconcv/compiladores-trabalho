@@ -31,7 +31,9 @@ b = FALSE . (5 <= (x * y));
 vb[x + 5] = TRUE;
 v1[(x + (y * (5 / 2)))] = (x * (y + 4 / 8)) / (x*y);
 x = v1[8];
-x = func();
+x = func('a', 5.5);
+x = func(func(k, 5), (x * (y + 4 / 8)) / (x*y));
+b = (funcbool2(FALSE v TRUE, 5 + 8) v (x <= (5 * y))) . ((5 + (y / 2)) == (x * 5 - 4));
 }
 
 int funcaodois()
@@ -42,3 +44,5 @@ int funcvazia() {    }
 int funccmdvaz() {  ; ;  ; }
 
 bool funcbool(){}
+
+bool funcbool2(bool b, int x){}

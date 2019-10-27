@@ -12,6 +12,7 @@ int yyerror(const char* msg);
 int getLineNumber(void);
 //int yylex();
 FILE* output = NULL;
+AST* root = NULL;
 
 %}
 
@@ -89,7 +90,7 @@ FILE* output = NULL;
 
 %%
 
-begin: programa					{ astPrint($1, 0); astToSourceCode(output, $1, 1); checkAndSetTypes($1); checkUndeclared(); checkOperands($1); fprintf(stderr, "%d semantic errors.\n", getSemanticErrors()); }
+begin: programa					{ root = $1; astPrint($1, 0); astToSourceCode(output, $1, 1); checkAndSetTypes($1); checkUndeclared(); checkOperands($1); fprintf(stderr, "%d semantic errors.\n", getSemanticErrors()); }
 	;
 
 programa: programa decl				{ $$ = astCreate(AST_LDECL, 0, $1, $2, 0, 0, getLineNumber()); }
@@ -219,4 +220,8 @@ int yyerror(const char* msg){
 
 void outputFile(FILE* file){
 	output = file;
+}
+
+AST* getRootAST(){
+	return root;
 }

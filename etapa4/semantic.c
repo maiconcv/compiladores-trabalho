@@ -1,5 +1,7 @@
 #include "semantic.h"
 
+AST* getRootAST();
+
 int semanticError = 0;
 
 void checkAndSetTypes(AST* node){
@@ -220,6 +222,21 @@ void checkOperands(AST* node){
 				semanticError++;
 			}
 			break;
+		case AST_FUNCALL:
+			;
+			AST* root = getRootAST();
+			AST* fundecl = findFunctionDeclaration(root, node->symbol->text);
+			if(fundecl == NULL)
+				; // function not declared, not needed to count another semantic error because undeclared functions already checked at checkUndeclared()
+			else{
+				if(compareFuncParamWithArg(node->son[0], fundecl->son[1], 1) == FUNC_NOERROR)
+					;
+				else{
+					fprintf(stderr, "Semantic ERROR: More arguments than parametes for function %s at line %d.\n", node->symbol->text, node->line);
+					semanticError++;
+				}
+			}
+			break;
 		default:
 			break;
 	}
@@ -313,8 +330,61 @@ int checkBracketsType(AST* node, int expectedType){
 			else
 				return TYPE_ERROR;
 			break;
+		case AST_PARAM:
+			if(expectedType == TYPE_NUMERIC &&
+			   (node->son[0]->type == AST_TYPEINT ||
+			    node->son[0]->type == AST_TYPELONG ||
+		    	    node->son[0]->type == AST_TYPEFLOAT ||
+		    	    node->son[0]->type == AST_TYPEBYTE))
+				return TYPE_NUMERIC;
+			else if(expectedType == TYPE_BOOLEAN &&
+				node->son[0]->type == AST_TYPEBOOL)
+				return TYPE_BOOLEAN;
+			else
+				return TYPE_ERROR;
+			break;
 		default:
 			break;
 	}
 	return TYPE_ERROR;
+}
+
+AST* findFunctionDeclaration(AST* node, char* functionName){
+	if(!node)
+		return NULL;
+
+	switch (node->type) {
+		case AST_LDECL:
+			if(findFunctionDeclaration(node->son[1], functionName) != NULL)
+				return node->son[1];
+			else
+				return findFunctionDeclaration(node->son[0], functionName);
+			break;
+		case AST_FUNDECL:
+			if(strcmp(node->symbol->text, functionName) == 0)
+				return node;
+			else
+				return NULL;
+			break;
+		default:
+			return NULL;
+			break;
+	}
+}
+
+int compareFuncParamWithArg(AST* lstArgNode, AST* lstParamNode, int counter){
+	if(!lstArgNode && !lstParamNode)
+		return FUNC_NOERROR;
+	if(!lstArgNode || !lstParamNode)
+		return FUNC_ARGNUMERROR;
+
+	if(checkBracketsType(lstArgNode->son[0], TYPE_NUMERIC) == checkBracketsType(lstParamNode->son[0], TYPE_NUMERIC) ||
+	   checkBracketsType(lstArgNode->son[0], TYPE_BOOLEAN) == checkBracketsType(lstParamNode->son[0], TYPE_BOOLEAN))
+		;
+	else{
+		fprintf(stderr, "Semantic ERROR: Type of argument %d is not compatible with type of parameter %d at line %d.\n", counter, counter, lstArgNode->line);
+		semanticError++;
+	}
+
+	return compareFuncParamWithArg(lstArgNode->son[1], lstParamNode->son[1], counter+1);
 }
