@@ -140,6 +140,12 @@ void checkOperands(AST* node){
 					if(node->son[i]->type == AST_AND ||
 					   node->son[i]->type == AST_OR ||
 					   node->son[i]->type == AST_NOT ||
+					   node->son[i]->type == AST_EQ ||
+					   node->son[i]->type == AST_DIF ||
+					   node->son[i]->type == AST_LT ||
+					   node->son[i]->type == AST_GT ||
+					   node->son[i]->type == AST_LE ||
+					   node->son[i]->type == AST_GE ||
 
 					   (node->son[i]->type == AST_SYMBOL &&
 					    node->son[i]->symbol->type == SYMBOL_SCALAR &&
