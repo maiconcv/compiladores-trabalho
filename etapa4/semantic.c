@@ -81,7 +81,7 @@ void checkOperands(AST* node){
 				    checkBracketsType(node->son[i], TYPE_NUMERIC) == TYPE_NUMERIC))
 					;
 				else{
-					fprintf(stderr, "Semantic ERROR: Operands not compatible at line %d. Expecting only numeric operands.\n", node->line);
+					fprintf(stderr, "Semantic ERROR: Operands not compatible at line %d.\n", node->line);
 					semanticError++;
 				}
 			}
