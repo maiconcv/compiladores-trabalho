@@ -262,11 +262,19 @@ void checkOperands(AST* node){
 				if(compareFuncParamWithArg(node->son[0], fundecl->son[1], 1) == FUNC_NOERROR)
 					;
 				else{
-					fprintf(stderr, "Semantic ERROR: More arguments than parametes for function %s at line %d.\n", node->symbol->text, node->line);
+					fprintf(stderr, "Semantic ERROR: Number of arguments not compatible with number of parametes for function %s at line %d.\n", node->symbol->text, node->line);
 					semanticError++;
 				}
 			}
 			break;
+		case AST_SYMBOL:
+			if(checkBracketsType(node, TYPE_NUMERIC) == TYPE_NUMERIC ||
+			   checkBracketsType(node, TYPE_BOOLEAN) == TYPE_BOOLEAN)
+				;
+			else{
+				fprintf(stderr, "Semantic ERROR: Symbol %s not used correctly at line %d.\n", node->symbol->text, node->line);
+				semanticError++;
+			}
 		default:
 			break;
 	}
