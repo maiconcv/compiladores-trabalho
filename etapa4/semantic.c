@@ -72,9 +72,11 @@ void checkOperands(AST* node){
 				     node->son[i]->symbol->type == SYMBOL_LITREAL)) ||
 
 				   (node->son[i]->type == AST_VECTREAD &&
+				    node->son[i]->symbol->type == SYMBOL_VECTOR &&
 				    node->son[i]->symbol->datatype != DATATYPE_BOOL) ||
 
 				   (node->son[i]->type == AST_FUNCALL &&
+				    node->son[i]->symbol->type == SYMBOL_FUNCTION &&
 				    node->son[i]->symbol->datatype != DATATYPE_BOOL) ||
 
 				   (node->son[i]->type == AST_BRACKETS &&
@@ -105,9 +107,11 @@ void checkOperands(AST* node){
 			    	     node->son[i]->symbol->type == SYMBOL_LITREAL)) ||
 
 			     	   (node->son[i]->type == AST_VECTREAD &&
+				    node->son[i]->symbol->type == SYMBOL_VECTOR &&
 				    node->son[i]->symbol->datatype != DATATYPE_BOOL) ||
 
 			    	   (node->son[i]->type == AST_FUNCALL &&
+				    node->son[i]->symbol->type == SYMBOL_FUNCTION &&
 				    node->son[i]->symbol->datatype != DATATYPE_BOOL) ||
 
 			    	   (node->son[i]->type == AST_BRACKETS &&
@@ -155,9 +159,11 @@ void checkOperands(AST* node){
 					    node->son[i]->symbol->type == SYMBOL_LITBOOL) ||
 
 					   (node->son[i]->type == AST_VECTREAD &&
+					    node->son[i]->symbol->type == SYMBOL_VECTOR &&
 					    node->son[i]->symbol->datatype == DATATYPE_BOOL) ||
 
 					   (node->son[i]->type == AST_FUNCALL &&
+					    node->son[i]->symbol->type == SYMBOL_FUNCTION &&
 					    node->son[i]->symbol->datatype == DATATYPE_BOOL) ||
 
 					   (node->son[i]->type == AST_BRACKETS &&
@@ -200,8 +206,16 @@ void checkOperands(AST* node){
 			}
 			break;
 		case AST_VECTREAD:
-			if(!(checkBracketsType(node->son[0], TYPE_NUMERIC) == TYPE_NUMERIC))
-			{
+			if(node->symbol->type == SYMBOL_VECTOR)
+				;
+			else{
+				fprintf(stderr, "Semantic ERROR: Symbol %s used as a vector but it is not a vector at line %d.\n", node->symbol->text, node->line);
+				semanticError++;
+			}
+
+			if(checkBracketsType(node->son[0], TYPE_NUMERIC) == TYPE_NUMERIC)
+				;
+			else{
 				fprintf(stderr, "Semantic ERROR: Vector index must be a numeric type at line %d.\n", node->line);
 				semanticError++;
 			}
@@ -229,7 +243,13 @@ void checkOperands(AST* node){
 			}
 			break;
 		case AST_FUNCALL:
-			;
+			if(node->symbol->type == SYMBOL_FUNCTION)
+				;
+			else{
+				fprintf(stderr, "Semantic ERROR: Symbol %s used as a function but it is not a function at line %d.\n", node->symbol->text, node->line);
+				semanticError++;
+			}
+
 			AST* root = getRootAST();
 			AST* fundecl = findFunctionDeclaration(root, node->symbol->text);
 			if(fundecl == NULL)
