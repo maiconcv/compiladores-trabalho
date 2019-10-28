@@ -52,4 +52,4 @@ int funccmdvaz() {  ; ;  ; }
 
 bool funcbool(){}
 
-bool funcbool2(bool b, int x){}
+bool funcbool2(bool bb, int z){}

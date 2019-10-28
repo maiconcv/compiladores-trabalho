@@ -10,14 +10,14 @@ void checkAndSetTypes(AST* node){
 		return;
 
 	// take all declaration nodes
-	if(node->type == AST_VARDECL || node->type == AST_VECTDECL || node->type == AST_FUNDECL){
-		if(node->symbol && node->symbol->type != SYMBOL_IDENTIFIER){
+	if(node->type == AST_VARDECL || node->type == AST_VECTDECL || node->type == AST_FUNDECL || node->type == AST_PARAM){
+		if(node->symbol && node->symbol->type != SYMBOL_IDENTIFIER && node->type != AST_PARAM){
 			fprintf(stderr, "Semantic ERROR: Symbol %s already declared at line %d.\n", node->symbol->text, node->line);
 			semanticError++;
 		}
 
 		// set the correct type (nature)
-		if(node->type == AST_VARDECL)
+		if(node->type == AST_VARDECL || node->type == AST_PARAM)
 			node->symbol->type = SYMBOL_SCALAR;
 		if(node->type == AST_VECTDECL)
 			node->symbol->type = SYMBOL_VECTOR;
