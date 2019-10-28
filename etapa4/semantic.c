@@ -310,14 +310,13 @@ void checkOperands(AST* node){
 			}
 			break;
 		case AST_RETURN:{
-			AST* root = getRootAST();
-			AST* fundecl = findFunctionDeclaration(root, currentFunDeclName);
-			if(fundecl == NULL)
+			HASH_NODE* funcNode = hashFind(currentFunDeclName);
+			if(funcNode == 0)
 				;
 			else{
-				if((fundecl->son[0]->type != AST_TYPEBOOL &&
+				if((funcNode->datatype != DATATYPE_BOOL &&
 				    checkBracketsType(node->son[0], TYPE_NUMERIC) == TYPE_NUMERIC) ||
-			   	   (fundecl->son[0]->type == AST_TYPEBOOL &&
+			    	   (funcNode->datatype == DATATYPE_BOOL &&
 				    checkBracketsType(node->son[0], TYPE_BOOLEAN) == TYPE_BOOLEAN))
 				    	;
 				else{
