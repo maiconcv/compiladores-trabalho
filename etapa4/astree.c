@@ -201,7 +201,7 @@ void astToSourceCode(FILE* file, AST* node, int firstParamOrArg){
 					astToSourceCode(file, node->son[0], 1);
 					fprintf(file, ") then ");
 					astToSourceCode(file, node->son[1], 1);
-					fprintf(file, "else ");
+					fprintf(file, " else ");
 					astToSourceCode(file, node->son[2], 1);
 					break;
 			case AST_WHILE: fprintf(file, "while(");
