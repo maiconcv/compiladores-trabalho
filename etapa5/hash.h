@@ -38,5 +38,6 @@ HASH_NODE* hashFind(char* text);
 HASH_NODE* hashInsert(char* text, int type, int line);
 void hashPrint(void);
 int hashCheckUndeclared(void);
+HASH_NODE* makeTemp(void);
 
 #endif // COMP_HASH_H

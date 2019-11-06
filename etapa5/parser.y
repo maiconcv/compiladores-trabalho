@@ -7,6 +7,7 @@
 #include "hash.h"
 #include "astree.h"
 #include "semantic.h"
+#include "tacs.h"
 
 int yyerror(const char* msg);
 int getLineNumber(void);
@@ -91,7 +92,14 @@ AST* root = NULL;
 
 %%
 
-begin: programa					{ root = $1; astPrint($1, 0); astToSourceCode(output, $1, 1); checkAndSetTypes($1); checkUndeclared(); checkOperands($1); fprintf(stderr, "%d semantic errors.\n", getSemanticErrors()); }
+begin: programa					{ root = $1;
+ 						  astPrint($1, 0);
+						  astToSourceCode(output, $1, 1);
+						  checkAndSetTypes($1);
+						  checkUndeclared();
+						  checkOperands($1);
+						  fprintf(stderr, "%d semantic errors.\n", getSemanticErrors());
+						  tacPrintBackwards(generateCode($1)); }
 	;
 
 programa: programa decl				{ $$ = astCreate(AST_LDECL, 0, $1, $2, 0, 0, getLineNumber()); }

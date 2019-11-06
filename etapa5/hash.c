@@ -63,3 +63,10 @@ int hashCheckUndeclared(void){
 	return errors;
 }
 
+HASH_NODE* makeTemp(void){
+	static int serialNumber = 0;
+	static char name[100];
+
+	sprintf(name, "mYWeeirDJohannTemm_p%d", serialNumber++);
+	return hashInsert(name, 0, 0);
+}
