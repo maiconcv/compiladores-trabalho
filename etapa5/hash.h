@@ -17,6 +17,7 @@
 #define SYMBOL_SCALAR 7
 #define SYMBOL_VECTOR 8
 #define SYMBOL_FUNCTION 9
+#define SYMBOL_LABEL 10
 
 #define DATATYPE_BYTE 1
 #define DATATYPE_INT 2
@@ -39,5 +40,6 @@ HASH_NODE* hashInsert(char* text, int type, int line);
 void hashPrint(void);
 int hashCheckUndeclared(void);
 HASH_NODE* makeTemp(void);
+HASH_NODE* makeLabel(void);
 
 #endif // COMP_HASH_H

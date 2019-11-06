@@ -2,6 +2,7 @@
 
 // INTERNAL PROTOTYPES
 TAC* makeBinOp(int type, TAC* code0, TAC* code1);
+TAC* makeIfThen(TAC* code0, TAC* code1);
 
 TAC* tacCreate(int type, HASH_NODE* res, HASH_NODE* op1, HASH_NODE* op2){
         TAC* newtac;
@@ -29,6 +30,8 @@ void tacPrintSingle(TAC* tac){
                 case TAC_MUL: fprintf(stderr, "TAC_MUL"); break;
                 case TAC_DIV: fprintf(stderr, "TAC_DIV"); break;
                 case TAC_MOVE: fprintf(stderr, "TAC_MOVE"); break;
+                case TAC_IFZ: fprintf(stderr, "TAC_IFZ"); break;
+                case TAC_LABEL: fprintf(stderr, "TAC_LABEL"); break;
                 default: fprintf(stderr, "UNKNOWN"); break;
         }
 
@@ -84,6 +87,8 @@ TAC* generateCode(AST* ast){
                         break;
                 case AST_DIV: return makeBinOp(TAC_DIV, code[0], code[1]);
                         break;
+                case AST_IF: return makeIfThen(code[0], code[1]);
+                        break;
                 default: return tacJoin(tacJoin(tacJoin(code[0], code[1]), code[2]), code[3]);
                         break;
         }
@@ -92,4 +97,16 @@ TAC* generateCode(AST* ast){
 
 TAC* makeBinOp(int type, TAC* code0, TAC* code1){
         return tacJoin(tacJoin(code0, code1), tacCreate(type, makeTemp(), code0?code0->res:0, code1?code1->res:0));
+}
+
+TAC* makeIfThen(TAC* code0, TAC* code1){
+        HASH_NODE* label = 0;
+        TAC* tacif = 0;
+        TAC* taclabel = 0;
+
+        label = makeLabel();
+        tacif = tacCreate(TAC_IFZ, label, code0?code0->res:0, 0);
+        taclabel = tacCreate(TAC_LABEL, label, 0, 0);
+
+        return tacJoin(tacJoin(tacJoin(code0, tacif), code1), taclabel);
 }
