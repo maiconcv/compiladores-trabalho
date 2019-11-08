@@ -12,6 +12,15 @@
 #define TAC_MOVE 6
 #define TAC_IFZ 7
 #define TAC_LABEL 8
+#define TAC_LT 9
+#define TAC_GT 10
+#define TAC_LE 11
+#define TAC_GE 12
+#define TAC_EQ 13
+#define TAC_DIF 14
+#define TAC_AND 15
+#define TAC_OR 16
+#define TAC_NOT 17
 
 typedef struct tac_node {
 	int type;

@@ -32,6 +32,15 @@ void tacPrintSingle(TAC* tac){
                 case TAC_MOVE: fprintf(stderr, "TAC_MOVE"); break;
                 case TAC_IFZ: fprintf(stderr, "TAC_IFZ"); break;
                 case TAC_LABEL: fprintf(stderr, "TAC_LABEL"); break;
+                case TAC_LT: fprintf(stderr, "TAC_LT"); break;
+                case TAC_GT: fprintf(stderr, "TAC_GT"); break;
+                case TAC_LE: fprintf(stderr, "TAC_LE"); break;
+                case TAC_GE: fprintf(stderr, "TAC_GE"); break;
+                case TAC_EQ: fprintf(stderr, "TAC_EQ"); break;
+                case TAC_DIF: fprintf(stderr, "TAC_DIF"); break;
+                case TAC_AND: fprintf(stderr, "TAC_AND"); break;
+                case TAC_OR: fprintf(stderr, "TAC_OR"); break;
+                case TAC_NOT: fprintf(stderr, "TAC_NOT"); break;
                 default: fprintf(stderr, "UNKNOWN"); break;
         }
 
@@ -86,6 +95,24 @@ TAC* generateCode(AST* ast){
                 case AST_MUL: return makeBinOp(TAC_MUL, code[0], code[1]);
                         break;
                 case AST_DIV: return makeBinOp(TAC_DIV, code[0], code[1]);
+                        break;
+                case AST_LT: return makeBinOp(TAC_LT, code[0], code[1]);
+                        break;
+                case AST_GT: return makeBinOp(TAC_GT, code[0], code[1]);
+                        break;
+                case AST_LE: return makeBinOp(TAC_LE, code[0], code[1]);
+                        break;
+                case AST_GE: return makeBinOp(TAC_GE, code[0], code[1]);
+                        break;
+                case AST_EQ: return makeBinOp(TAC_EQ, code[0], code[1]);
+                        break;
+                case AST_DIF: return makeBinOp(TAC_DIF, code[0], code[1]);
+                        break;
+                case AST_AND: return makeBinOp(TAC_AND, code[0], code[1]);
+                        break;
+                case AST_OR: return makeBinOp(TAC_OR, code[0], code[1]);
+                        break;
+                case AST_NOT: return tacJoin(code[0], tacCreate(TAC_NOT, makeTemp(), code[0]?code[0]->res:0, 0));
                         break;
                 case AST_IF: return makeIfThen(code[0], code[1]);
                         break;
