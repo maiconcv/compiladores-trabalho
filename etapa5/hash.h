@@ -18,6 +18,7 @@
 #define SYMBOL_VECTOR 8
 #define SYMBOL_FUNCTION 9
 #define SYMBOL_LABEL 10
+#define SYMBOL_TEMP 11
 
 #define DATATYPE_BYTE 1
 #define DATATYPE_INT 2
