@@ -21,6 +21,7 @@
 #define TAC_AND 15
 #define TAC_OR 16
 #define TAC_NOT 17
+#define TAC_JUMP 18
 
 typedef struct tac_node {
 	int type;
