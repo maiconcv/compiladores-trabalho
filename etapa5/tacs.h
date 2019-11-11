@@ -23,6 +23,9 @@
 #define TAC_NOT 17
 #define TAC_JUMP 18
 #define TAC_READ 19
+#define TAC_BEGINFUN 20
+#define TAC_ENDFUN 21
+#define TAC_RETURN 22
 
 typedef struct tac_node {
 	int type;

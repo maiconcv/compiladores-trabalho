@@ -46,6 +46,9 @@ void tacPrintSingle(TAC* tac){
                 case TAC_NOT: fprintf(stderr, "TAC_NOT"); break;
                 case TAC_JUMP: fprintf(stderr, "TAC_JUMP"); break;
                 case TAC_READ: fprintf(stderr, "TAC_READ"); break;
+                case TAC_BEGINFUN: fprintf(stderr, "TAC_BEGINFUN"); break;
+                case TAC_ENDFUN: fprintf(stderr, "TAC_ENDFUN"); break;
+                case TAC_RETURN: fprintf(stderr, "TAC_RETURN"); break;
                 default: fprintf(stderr, "UNKNOWN"); break;
         }
 
@@ -129,6 +132,14 @@ TAC* generateCode(AST* ast){
                         break;
                 case AST_READ: return tacCreate(TAC_READ, ast->symbol, 0, 0);
                         break;
+                case AST_RETURN: return tacJoin(code[0], tacCreate(TAC_RETURN, code[0]?code[0]->res:0, 0, 0));
+                        break;
+                case AST_FUNDECL: return tacJoin(tacJoin(tacJoin(tacCreate(TAC_BEGINFUN, ast->symbol, 0, 0), code[1]), code[2]), tacCreate(TAC_ENDFUN, ast->symbol, 0, 0));
+                        break;
+                case AST_BLOCK: return code[0];
+                        break;
+                case AST_VARDECL: return tacCreate(TAC_MOVE, ast->symbol, code[1]?code[1]->res:0, 0);
+                        break;
                 default: return tacJoin(tacJoin(tacJoin(code[0], code[1]), code[2]), code[3]);
                         break;
         }
@@ -181,11 +192,13 @@ TAC* makeFor(HASH_NODE* var, TAC* code0, TAC* code1, TAC* code2, TAC* code3){
         TAC* tacLabelBeforeExp = tacCreate(TAC_LABEL, labelBeforeExp, 0, 0);
         TAC* tacLabelLeaveFor = tacCreate(TAC_LABEL, labelLeaveFor, 0, 0);
         TAC* tacMoveInit = tacCreate(TAC_MOVE, var, code0?code0->res:0, 0);
-        TAC* tacMoveInc = tacCreate(TAC_ADD, var, code2?code2->res:0, 0);
+        TAC* tacInc = tacCreate(TAC_ADD, var, code2?code2->res:0, 0);
+        TAC* tacMoveInc = tacCreate(TAC_MOVE, var, tacInc?tacInc->res:0, 0);
         fprintf(stderr, "opa");
         TAC* tacsymbol = tacCreate(TAC_SYMBOL, var, 0, 0);
         fprintf(stderr, "opa");
         TAC* tacCompare = makeBinOp(TAC_DIF, tacsymbol, code1); //tacCreate(TAC_DIF, var, code1?code1->res:0, 0);
 
-        return tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(code0, tacMoveInit), code1), tacLabelBeforeExp), tacCompare), tacif), code3), code2), tacMoveInc), tacjump), tacLabelLeaveFor);
+        return tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(code0, tacMoveInit), tacLabelBeforeExp), code1), tacCompare), tacif), code3), code2), tacInc), tacMoveInc), tacjump), tacLabelLeaveFor);
+        //return tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(code0, tacMoveInit), code1), tacLabelBeforeExp), tacCompare), tacif), code3), code2), tacMoveInc), tacjump), tacLabelLeaveFor);
 }
