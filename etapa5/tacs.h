@@ -29,6 +29,7 @@
 #define TAC_PRINT 23
 #define TAC_MOVEVECT 24
 #define TAC_VECTREAD 25
+#define TAC_PARAM 26
 
 typedef struct tac_node {
 	int type;
