@@ -49,6 +49,9 @@ void tacPrintSingle(TAC* tac){
                 case TAC_BEGINFUN: fprintf(stderr, "TAC_BEGINFUN"); break;
                 case TAC_ENDFUN: fprintf(stderr, "TAC_ENDFUN"); break;
                 case TAC_RETURN: fprintf(stderr, "TAC_RETURN"); break;
+                case TAC_PRINT: fprintf(stderr, "TAC_PRINT"); break;
+                case TAC_MOVEVECT: fprintf(stderr, "TAC_MOVEVECT"); break;
+                case TAC_VECTREAD: fprintf(stderr, "TAC_VECTREAD"); break;
                 default: fprintf(stderr, "UNKNOWN"); break;
         }
 
@@ -139,6 +142,14 @@ TAC* generateCode(AST* ast){
                 case AST_BLOCK: return code[0];
                         break;
                 case AST_VARDECL: return tacCreate(TAC_MOVE, ast->symbol, code[1]?code[1]->res:0, 0);
+                        break;
+                case AST_PRINT: return code[0];
+                        break;
+                case AST_PRINTARG: return tacJoin(tacJoin(code[0], tacCreate(TAC_PRINT, code[0]?code[0]->res:0, 0, 0)), code[1]);
+                        break;
+                case AST_VECTASSIGN: return tacJoin(tacJoin(code[0], code[1]), tacCreate(TAC_MOVEVECT, ast->symbol, code[0]?code[0]->res:0, code[1]?code[1]->res:0));
+                        break;
+                case AST_VECTREAD: return tacJoin(code[0], tacCreate(TAC_VECTREAD, makeTemp(), ast->symbol, code[0]?code[0]->res:0));
                         break;
                 default: return tacJoin(tacJoin(tacJoin(code[0], code[1]), code[2]), code[3]);
                         break;
