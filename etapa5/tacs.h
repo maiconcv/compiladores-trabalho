@@ -32,6 +32,8 @@
 #define TAC_PARAM 26
 #define TAC_VARDECL 27
 #define TAC_VECTDECL 28
+#define TAC_FUNCALL 29
+#define TAC_ARG 30
 
 typedef struct tac_node {
 	int type;

@@ -55,6 +55,8 @@ void tacPrintSingle(TAC* tac){
                 case TAC_PARAM: fprintf(stderr, "TAC_PARAM"); break;
                 case TAC_VARDECL: fprintf(stderr, "TAC_VARDECL"); break;
                 case TAC_VECTDECL: fprintf(stderr, "TAC_VECTDECL"); break;
+                case TAC_FUNCALL: fprintf(stderr, "TAC_FUNCALL"); break;
+                case TAC_ARG: fprintf(stderr, "TAC_ARG"); break;
                 default: fprintf(stderr, "UNKNOWN"); break;
         }
 
@@ -169,6 +171,10 @@ TAC* generateCode(AST* ast){
                 case AST_LCMD: return tacJoin(code[0], code[1]);
                         break;
                 case AST_LDECL: return tacJoin(code[0], code[1]);
+                        break;
+                case AST_FUNCALL: return tacJoin(code[0], tacCreate(TAC_FUNCALL, makeTemp(), ast->symbol, 0));
+                        break;
+                case AST_FUNARG: return tacJoin(tacJoin(code[0], tacCreate(TAC_ARG, code[0]?code[0]->res:0, 0, 0)), code[1]);
                         break;
                 default: return tacJoin(tacJoin(tacJoin(code[0], code[1]), code[2]), code[3]);
                         break;
