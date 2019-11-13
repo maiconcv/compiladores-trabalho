@@ -34,6 +34,7 @@
 #define TAC_VECTDECL 28
 #define TAC_FUNCALL 29
 #define TAC_ARG 30
+#define TAC_BREAK 31
 
 typedef struct tac_node {
 	int type;
@@ -49,5 +50,6 @@ void tacPrintSingle(TAC* tac);
 void tacPrintBackwards(TAC* tac);
 TAC* tacJoin(TAC* l1, TAC* l2);
 TAC* generateCode(AST* ast);
+void tacPrintForwards(TAC* tac);
 
 #endif // COMP_TACS_H

@@ -57,6 +57,7 @@ void tacPrintSingle(TAC* tac){
                 case TAC_VECTDECL: fprintf(stderr, "TAC_VECTDECL"); break;
                 case TAC_FUNCALL: fprintf(stderr, "TAC_FUNCALL"); break;
                 case TAC_ARG: fprintf(stderr, "TAC_ARG"); break;
+                case TAC_BREAK: fprintf(stderr, "TAC_BREAK"); break;
                 default: fprintf(stderr, "UNKNOWN"); break;
         }
 
@@ -176,6 +177,8 @@ TAC* generateCode(AST* ast){
                         break;
                 case AST_FUNARG: return tacJoin(tacJoin(code[0], tacCreate(TAC_ARG, code[0]?code[0]->res:0, 0, 0)), code[1]);
                         break;
+                case AST_BREAK: return tacCreate(TAC_BREAK, 0, 0, 0);
+                        break;
                 default: return tacJoin(tacJoin(tacJoin(code[0], code[1]), code[2]), code[3]);
                         break;
         }
@@ -221,20 +224,33 @@ TAC* makeWhile(TAC* code0, TAC* code1){
 }
 
 TAC* makeFor(HASH_NODE* var, TAC* code0, TAC* code1, TAC* code2, TAC* code3){
-        HASH_NODE* labelBeforeExp = makeLabel();
+        HASH_NODE* labelBeforeFor = makeLabel();
         HASH_NODE* labelLeaveFor = makeLabel();
-        TAC* tacif = tacCreate(TAC_IFZ, labelLeaveFor, var, 0);
-        TAC* tacjump = tacCreate(TAC_JUMP, labelBeforeExp, 0, 0);
-        TAC* tacLabelBeforeExp = tacCreate(TAC_LABEL, labelBeforeExp, 0, 0);
-        TAC* tacLabelLeaveFor = tacCreate(TAC_LABEL, labelLeaveFor, 0, 0);
-        TAC* tacMoveInit = tacCreate(TAC_MOVE, var, code0?code0->res:0, 0);
-        TAC* tacInc = tacCreate(TAC_ADD, var, code2?code2->res:0, 0);
-        TAC* tacMoveInc = tacCreate(TAC_MOVE, var, tacInc?tacInc->res:0, 0);
-        fprintf(stderr, "opa");
-        TAC* tacsymbol = tacCreate(TAC_SYMBOL, var, 0, 0);
-        fprintf(stderr, "opa");
-        TAC* tacCompare = makeBinOp(TAC_DIF, tacsymbol, code1); //tacCreate(TAC_DIF, var, code1?code1->res:0, 0);
+        HASH_NODE* compareResult = makeTemp();
 
-        return tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(code0, tacMoveInit), tacLabelBeforeExp), code1), tacCompare), tacif), code3), code2), tacInc), tacMoveInc), tacjump), tacLabelLeaveFor);
-        //return tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(code0, tacMoveInit), code1), tacLabelBeforeExp), tacCompare), tacif), code3), code2), tacMoveInc), tacjump), tacLabelLeaveFor);
+        TAC* tacMoveInitValue = tacCreate(TAC_MOVE, var, code0?code0->res:0, 0);
+        TAC* tacLabelBeforeFor = tacCreate(TAC_LABEL, labelBeforeFor, 0, 0);
+
+        TAC* tacCompare;
+        int incNumber = atoi(code2->res->text);
+        fprintf(stderr, "%s, %d\n", code2->res->text, incNumber);
+        if(incNumber >= 0)
+                tacCompare = tacCreate(TAC_LT, compareResult, var, code1?code1->res:0);
+        else
+                tacCompare = tacCreate(TAC_GT, compareResult, var, code1?code1->res:0);
+
+        TAC* tacIf = tacCreate(TAC_IFZ, labelLeaveFor, compareResult, 0);
+        TAC* tacInc = tacCreate(TAC_ADD, makeTemp(), var, code2?code2->res:0);
+        TAC* tacMoveInc = tacCreate(TAC_MOVE, var, tacInc?tacInc->res:0, 0);
+        TAC* tacJump = tacCreate(TAC_JUMP, labelBeforeFor, 0, 0);
+        TAC* tacLabelLeaveFor = tacCreate(TAC_LABEL, labelLeaveFor, 0, 0);
+
+        return tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(code0, tacMoveInitValue), tacLabelBeforeFor), code1), tacCompare), tacIf), code3), code2), tacInc), tacMoveInc), tacJump), tacLabelLeaveFor);
+}
+
+void tacPrintForwards(TAC* tac){
+        if(!tac) return;
+
+        tacPrintForwards(tac->prev);
+        tacPrintSingle(tac);
 }
