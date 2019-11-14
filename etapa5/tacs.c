@@ -233,7 +233,6 @@ TAC* makeFor(HASH_NODE* var, TAC* code0, TAC* code1, TAC* code2, TAC* code3){
 
         TAC* tacCompare;
         int incNumber = atoi(code2->res->text);
-        fprintf(stderr, "%s, %d\n", code2->res->text, incNumber);
         if(incNumber >= 0)
                 tacCompare = tacCreate(TAC_LT, compareResult, var, code1?code1->res:0);
         else
