@@ -90,14 +90,30 @@ TAC* tacJoin(TAC* l1, TAC* l2){
         return l2;
 }
 
-TAC* generateCode(AST* ast){
+TAC* generateCode(AST* ast, HASH_NODE* funCallName, int funArgCounter){
         if(!ast) return 0;
 
         TAC* code[MAX_SONS];
 
+        HASH_NODE* currFunCall = 0;
+        int currArgCounter = 0;
+        HASH_NODE* currArgCounterSymbol = 0;
+        if(ast->type == AST_FUNCALL){
+                currFunCall = ast->symbol;
+                currArgCounter = 0;
+        }
+        else if(ast->type == AST_FUNARG){
+                currFunCall = funCallName;
+                currArgCounter = funArgCounter + 1;
+
+                char text[100];
+                sprintf(text, "%d", currArgCounter);
+                currArgCounterSymbol = hashInsert(text, SYMBOL_LITINT, 0);
+        }
+
         // generate code for my sons first
         for(int i = 0; i < MAX_SONS; ++i)
-                code[i] = generateCode(ast->son[i]);
+                code[i] = generateCode(ast->son[i], currFunCall, currArgCounter);
 
         // then process this node
         switch (ast->type) {
@@ -175,7 +191,7 @@ TAC* generateCode(AST* ast){
                         break;
                 case AST_FUNCALL: return tacJoin(code[0], tacCreate(TAC_FUNCALL, makeTemp(), ast->symbol, 0));
                         break;
-                case AST_FUNARG: return tacJoin(tacJoin(code[0], tacCreate(TAC_ARG, code[0]?code[0]->res:0, 0, 0)), code[1]);
+                case AST_FUNARG: return tacJoin(tacJoin(code[0], tacCreate(TAC_ARG, code[0]?code[0]->res:0, currFunCall, currArgCounterSymbol)), code[1]);
                         break;
                 case AST_BREAK: return tacCreate(TAC_BREAK, 0, 0, 0);
                         break;

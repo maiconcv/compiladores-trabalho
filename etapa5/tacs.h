@@ -49,7 +49,7 @@ TAC* tacCreate(int type, HASH_NODE* res, HASH_NODE* op1, HASH_NODE* op2);
 void tacPrintSingle(TAC* tac);
 void tacPrintBackwards(TAC* tac);
 TAC* tacJoin(TAC* l1, TAC* l2);
-TAC* generateCode(AST* ast);
+TAC* generateCode(AST* ast, HASH_NODE* funCallName, int funArgCounter);
 void tacPrintForwards(TAC* tac);
 
 #endif // COMP_TACS_H

@@ -99,7 +99,7 @@ begin: programa					{ root = $1;
 						  checkUndeclared();
 						  checkOperands($1);
 						  fprintf(stderr, "%d semantic errors.\n", getSemanticErrors());
-						  tacPrintForwards(generateCode($1)); }
+						  tacPrintForwards(generateCode($1, 0, 0)); }
 	;
 
 programa: programa decl				{ $$ = astCreate(AST_LDECL, 0, $1, $2, 0, 0, getLineNumber()); }
