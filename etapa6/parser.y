@@ -14,6 +14,7 @@ int getLineNumber(void);
 //int yylex();
 FILE* output = NULL;
 AST* root = NULL;
+TAC* tac = NULL;
 
 %}
 
@@ -99,7 +100,9 @@ begin: programa					{ root = $1;
 						  checkUndeclared();
 						  checkOperands($1);
 						  fprintf(stderr, "%d semantic errors.\n", getSemanticErrors());
-						  tacPrintForwards(generateCode($1, 0, 0)); }
+						  tac = generateCode($1, 0, 0);
+						  tacPrintForwards(tac);
+						  generateASM(tac, fopen("asm.s", "w")); }
 	;
 
 programa: programa decl				{ $$ = astCreate(AST_LDECL, 0, $1, $2, 0, 0, getLineNumber()); }

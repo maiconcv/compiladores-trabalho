@@ -269,3 +269,35 @@ void tacPrintForwards(TAC* tac){
         tacPrintForwards(tac->prev);
         tacPrintSingle(tac);
 }
+
+void generateASM(TAC* tac, FILE* fout){
+        if(!tac) return;
+
+        if(tac->prev)
+                generateASM(tac->prev, fout);
+
+        switch (tac->type) {
+                case TAC_VARDECL: fprintf(fout, "\n\t.data\n"
+                                                "_%s:\t.long\t%s\n", tac->res->text, tac->op1->text); // won't be 'long' for all, type will come from hash
+                        break;
+                case TAC_BEGINFUN: fprintf(fout, "\n\t.globl\t%s\n"
+                                                 "\t.type\t%s, @function\n"
+                                                 "%s:\n"
+                                                 ".LFB0:\n"
+                                                 "\tpushq\t%%rbp\n"
+                                                 "\tmovq\t%%rsp, %%rbp\n", tac->res->text, tac->res->text, tac->res->text); // it won't be 'LFB0' for all, there will be a counter
+                        break;
+                case TAC_ENDFUN: fprintf(fout, "\tmovl\t$0, %%eax\n"
+                                                "\tpopq\t%%rbp\n"
+                                                "\tret\n"
+                                                ".LFE0:\n"
+                                                "\t.size\t%s, .-%s\n", tac->res->text, tac->res->text);
+                        break;
+                case TAC_PRINT: fprintf(fout, "\tleaq\t_%s(%%rip), %%rdi\n"
+                                                "\tcall\tprintf@PLT\n", tac->res->text); // prints a string, not a variable
+                                                // there's an issue on the '%s' after 'leaq': right now it is the string itself, not a variable containing the string
+                        break;
+                default:
+                        break;
+        }
+}

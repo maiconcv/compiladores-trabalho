@@ -51,5 +51,6 @@ void tacPrintBackwards(TAC* tac);
 TAC* tacJoin(TAC* l1, TAC* l2);
 TAC* generateCode(AST* ast, HASH_NODE* funCallName, int funArgCounter);
 void tacPrintForwards(TAC* tac);
+void generateASM(TAC* tac, FILE* fout);
 
 #endif // COMP_TACS_H
