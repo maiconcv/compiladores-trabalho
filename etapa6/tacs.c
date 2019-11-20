@@ -293,10 +293,30 @@ void generateASM(TAC* tac, FILE* fout){
                                                 ".LFE0:\n"
                                                 "\t.size\t%s, .-%s\n", tac->res->text, tac->res->text);
                         break;
-                case TAC_PRINT: // in the future, it will have a switch case to check if tac->res->type is a litstring, a litchar, a variable, ...
-                                ;int counter = findCounter(tac->res->text);
-                                fprintf(fout, "\tleaq\t_%s%d(%%rip), %%rdi\n"
-                                                "\tcall\tprintf@PLT\n", LITSTR_VAR_NAME, counter); // prints a string, not a variable
+                case TAC_PRINT:
+                        switch (tac->res->type) {
+                                case SYMBOL_LITSTRING:{
+                                        int counter = findCounter(tac->res->text);
+                                        fprintf(fout, "\tleaq\t_%s%d(%%rip), %%rdi\n"
+                                                "\tcall\tprintf@PLT\n", LITSTR_VAR_NAME, counter);
+                                        break;
+                                }
+                                case SYMBOL_LITCHAR:{
+                                        int counter = findCounter(tac->res->text);
+                                        fprintf(fout, "\tmovzbl\t_%s%d(%%rip), %%eax\n"
+                                                        "\tmovsbl\t%%al, %%eax\n"
+                                                        "\tmovl\t%%eax, %%edi\n"
+                                                        "\tcall\tputchar@PLT\n", LITCHAR_VAR_NAME, counter);
+                                        break;
+                                }
+                                case SYMBOL_SCALAR:
+                                        fprintf(fout, "\tmovl\t_%s(%%rip), %%eax\n"
+                                                        "\tmovl\t%%eax, %%esi\n"
+                                                        "\tleaq\t_LC0(%%rip), %%rdi\n"
+                                                        "\tmovl\t$0, %%eax\n"
+                                                        "\tcall\tprintf@PLT\n", tac->res->text);
+                                        break;
+                        }
                         break;
                 default:
                         break;

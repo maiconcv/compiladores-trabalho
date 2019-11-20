@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define LITSTR_VAR_NAME "lItsTtriNnG"
+#define LITSTR_VAR_NAME "lItsTtriNnG_"
+#define LITCHAR_VAR_NAME "lItcHaAR_"
 
 typedef struct litstr_to_var{
         int counter;

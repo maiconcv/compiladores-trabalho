@@ -96,7 +96,9 @@ void generateASMGlobalVariablesFromLitValues(FILE* fout){
                                         fprintf(fout, "_%s:\t.long\t%s\n", node->text, node->text);
                                 }
                                 else if(node->type == SYMBOL_LITCHAR){
-                                        fprintf(fout, "_lItcHaAR%c:\t.byte\t%d\n", node->text[1], (int)(node->text[1]));
+					addMatch(node->text, stringCounter);
+                                        fprintf(fout, "_%s%d:\t.byte\t%d\n", LITCHAR_VAR_NAME, stringCounter, (int)(node->text[1]));
+					stringCounter++;
                                 }
                         }
                 }
