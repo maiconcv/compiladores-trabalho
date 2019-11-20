@@ -78,3 +78,22 @@ HASH_NODE* makeLabel(void){
 	sprintf(name, "Lable%d", serialNumber++);
 	return hashInsert(name, SYMBOL_LABEL, 0);
 }
+
+void generateASMGlobalVariablesFromLitValues(FILE* fout){
+        static int stringCounter = 0;
+
+	fprintf(fout, "\t.section\t.rodata\n");
+
+        for(int i = 0; i < HASH_SIZE; i++){
+                for(HASH_NODE* node = Table[i]; node; node = node->next){
+                        if(node){
+                                if(node->type == SYMBOL_LITSTRING){
+                                        fprintf(fout, "_lItsTtriNnG%d:\t.string\t%s\n", stringCounter++, node->text);
+                                }
+                                else if(node->type == SYMBOL_LITINT){
+                                        fprintf(fout, "_%s:\t.long\t%s\n", node->text, node->text);
+                                }
+                        }
+                }
+        }
+}

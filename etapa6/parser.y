@@ -102,7 +102,10 @@ begin: programa					{ root = $1;
 						  fprintf(stderr, "%d semantic errors.\n", getSemanticErrors());
 						  tac = generateCode($1, 0, 0);
 						  tacPrintForwards(tac);
-						  generateASM(tac, fopen("asm.s", "w")); }
+						  FILE* fout = fopen("asm.s", "w");
+						  generateASMGlobalVariablesFromLitValues(fout);
+						  generateASM(tac, fout);
+						  fclose(fout); }
 	;
 
 programa: programa decl				{ $$ = astCreate(AST_LDECL, 0, $1, $2, 0, 0, getLineNumber()); }

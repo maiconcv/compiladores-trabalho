@@ -42,5 +42,6 @@ void hashPrint(void);
 int hashCheckUndeclared(void);
 HASH_NODE* makeTemp(void);
 HASH_NODE* makeLabel(void);
+void generateASMGlobalVariablesFromLitValues(FILE* fout);
 
 #endif // COMP_HASH_H
