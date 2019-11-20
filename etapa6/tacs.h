@@ -3,6 +3,7 @@
 
 #include "hash.h"
 #include "astree.h"
+#include "litstr_to_var.h"
 
 #define TAC_SYMBOL 1
 #define TAC_ADD 2

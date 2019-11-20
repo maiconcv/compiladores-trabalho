@@ -88,10 +88,15 @@ void generateASMGlobalVariablesFromLitValues(FILE* fout){
                 for(HASH_NODE* node = Table[i]; node; node = node->next){
                         if(node){
                                 if(node->type == SYMBOL_LITSTRING){
-                                        fprintf(fout, "_lItsTtriNnG%d:\t.string\t%s\n", stringCounter++, node->text);
+                                        addMatch(node->text, stringCounter);
+                                        fprintf(fout, "_%s%d:\t.string\t%s\n", LITSTR_VAR_NAME, stringCounter, node->text);
+                                        stringCounter++;
                                 }
                                 else if(node->type == SYMBOL_LITINT){
                                         fprintf(fout, "_%s:\t.long\t%s\n", node->text, node->text);
+                                }
+                                else if(node->type == SYMBOL_LITCHAR){
+                                        fprintf(fout, "_lItcHaAR%c:\t.byte\t%d\n", node->text[1], (int)(node->text[1]));
                                 }
                         }
                 }

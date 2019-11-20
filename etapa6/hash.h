@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "litstr_to_var.h"
 
 #define HASH_SIZE 997
 

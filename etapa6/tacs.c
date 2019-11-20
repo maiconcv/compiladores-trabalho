@@ -293,9 +293,10 @@ void generateASM(TAC* tac, FILE* fout){
                                                 ".LFE0:\n"
                                                 "\t.size\t%s, .-%s\n", tac->res->text, tac->res->text);
                         break;
-                case TAC_PRINT: fprintf(fout, "\tleaq\t_%s(%%rip), %%rdi\n"
-                                                "\tcall\tprintf@PLT\n", tac->res->text); // prints a string, not a variable
-                                                // there's an issue on the '%s' after 'leaq': right now it is the string itself, not a variable containing the string
+                case TAC_PRINT: // in the future, it will have a switch case to check if tac->res->type is a litstring, a litchar, a variable, ...
+                                ;int counter = findCounter(tac->res->text);
+                                fprintf(fout, "\tleaq\t_%s%d(%%rip), %%rdi\n"
+                                                "\tcall\tprintf@PLT\n", LITSTR_VAR_NAME, counter); // prints a string, not a variable
                         break;
                 default:
                         break;
