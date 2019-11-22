@@ -82,24 +82,29 @@ HASH_NODE* makeLabel(void){
 void generateASMGlobalVariablesFromLitValues(FILE* fout){
         static int stringCounter = 0;
 
-	fprintf(fout, "\t.section\t.rodata\n");
-
         for(int i = 0; i < HASH_SIZE; i++){
                 for(HASH_NODE* node = Table[i]; node; node = node->next){
                         if(node){
                                 if(node->type == SYMBOL_LITSTRING){
                                         addMatch(node->text, stringCounter);
-                                        fprintf(fout, "_%s%d:\t.string\t%s\n", LITSTR_VAR_NAME, stringCounter, node->text);
+                                        fprintf(fout, "\t.section\t.rodata\n"
+							"_%s%d:\t.string\t%s\n", LITSTR_VAR_NAME, stringCounter, node->text);
                                         stringCounter++;
                                 }
                                 else if(node->type == SYMBOL_LITINT){
-                                        fprintf(fout, "_%s:\t.long\t%s\n", node->text, node->text);
+                                        fprintf(fout, "\t.section\t.rodata\n"
+							"_%s:\t.long\t%s\n", node->text, node->text);
                                 }
                                 else if(node->type == SYMBOL_LITCHAR){
 					addMatch(node->text, stringCounter);
-                                        fprintf(fout, "_%s%d:\t.byte\t%d\n", LITCHAR_VAR_NAME, stringCounter, (int)(node->text[1]));
+                                        fprintf(fout, "\t.section\t.rodata\n"
+							"_%s%d:\t.byte\t%d\n", LITCHAR_VAR_NAME, stringCounter, (int)(node->text[1]));
 					stringCounter++;
                                 }
+				else if(node->type == SYMBOL_TEMP){
+					fprintf(fout, "\t.data\n"
+							"_%s:\t.long\t 0\n", node->text);
+				}
                         }
                 }
         }
