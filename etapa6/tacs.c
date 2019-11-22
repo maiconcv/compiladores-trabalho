@@ -333,6 +333,25 @@ void generateASM(TAC* tac, FILE* fout){
                                                 "\taddl\t%%edx, %%eax\n"
                                                 "\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->op2->text, tac->res->text);
                         break;
+                case TAC_SUB: fprintf(fout, "## TAC_SUB\n"
+                                                "\tmovl\t_%s(%%rip), %%edx\n"
+                                                "\tmovl\t_%s(%%rip), %%eax\n"
+                                                "\tsubl\t%%eax, %%edx\n"
+                                                "\tmovl\t%%edx, _%s(%%rip)\n", tac->op1->text, tac->op2->text, tac->res->text);
+                        break;
+                case TAC_MUL: fprintf(fout, "## TAC_MUL\n"
+                                                "\tmovl\t_%s(%%rip), %%edx\n"
+                                                "\tmovl\t_%s(%%rip), %%eax\n"
+                                                "\timull\t%%edx, %%eax\n"
+                                                "\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->op2->text, tac->res->text);
+                        break;
+                case TAC_DIV: fprintf(fout, "## TAC_DIV\n"
+                                                "\tmovl\t_%s(%%rip), %%eax\n"
+                                                "\tmovl\t_%s(%%rip), %%ecx\n"
+                                                "\tcltd\n"
+                                                "\tidivl\t%%ecx\n"
+                                                "\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->op2->text, tac->res->text);
+                        break;
                 default:
                         break;
         }
