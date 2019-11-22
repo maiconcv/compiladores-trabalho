@@ -280,14 +280,16 @@ void generateASM(TAC* tac, FILE* fout){
                 case TAC_VARDECL: fprintf(fout, "\n\t.data\n"
                                                 "_%s:\t.long\t%s\n", tac->res->text, tac->op1->text); // won't be 'long' for all, type will come from hash
                         break;
-                case TAC_BEGINFUN: fprintf(fout, "\n\t.globl\t%s\n"
+                case TAC_BEGINFUN: fprintf(fout, "\n## TAC_BEGINFUN\n"
+                                                 "\t.globl\t%s\n"
                                                  "\t.type\t%s, @function\n"
                                                  "%s:\n"
                                                  ".LFB0:\n"
                                                  "\tpushq\t%%rbp\n"
                                                  "\tmovq\t%%rsp, %%rbp\n", tac->res->text, tac->res->text, tac->res->text); // it won't be 'LFB0' for all, there will be a counter
                         break;
-                case TAC_ENDFUN: fprintf(fout, "\tmovl\t$0, %%eax\n"
+                case TAC_ENDFUN: fprintf(fout, "## TAC_ENDFUN\n"
+                                                "\tmovl\t$0, %%eax\n"
                                                 "\tpopq\t%%rbp\n"
                                                 "\tret\n"
                                                 ".LFE0:\n"
@@ -297,26 +299,33 @@ void generateASM(TAC* tac, FILE* fout){
                         switch (tac->res->type) {
                                 case SYMBOL_LITSTRING:{
                                         int counter = findCounter(tac->res->text);
-                                        fprintf(fout, "\tleaq\t_%s%d(%%rip), %%rdi\n"
-                                                "\tcall\tprintf@PLT\n", LITSTR_VAR_NAME, counter);
+                                        fprintf(fout, "## TAC_PRINT_LITSTRING\n"
+                                                        "\tleaq\t_%s%d(%%rip), %%rdi\n"
+                                                        "\tcall\tprintf@PLT\n", LITSTR_VAR_NAME, counter);
                                         break;
                                 }
                                 case SYMBOL_LITCHAR:{
                                         int counter = findCounter(tac->res->text);
-                                        fprintf(fout, "\tmovzbl\t_%s%d(%%rip), %%eax\n"
+                                        fprintf(fout, "## TAC_PRINT_LITCHAR\n"
+                                                        "\tmovzbl\t_%s%d(%%rip), %%eax\n"
                                                         "\tmovsbl\t%%al, %%eax\n"
                                                         "\tmovl\t%%eax, %%edi\n"
                                                         "\tcall\tputchar@PLT\n", LITCHAR_VAR_NAME, counter);
                                         break;
                                 }
                                 case SYMBOL_SCALAR:
-                                        fprintf(fout, "\tmovl\t_%s(%%rip), %%eax\n"
+                                        fprintf(fout, "## TAC_PRINT_VAR\n"
+                                                        "\tmovl\t_%s(%%rip), %%eax\n"
                                                         "\tmovl\t%%eax, %%esi\n"
                                                         "\tleaq\t_LC0(%%rip), %%rdi\n"
                                                         "\tmovl\t$0, %%eax\n"
                                                         "\tcall\tprintf@PLT\n", tac->res->text);
                                         break;
                         }
+                        break;
+                case TAC_MOVE: fprintf(fout, "## TAC_MOVE\n"
+                                                "\tmovl\t_%s(%%rip), %%eax\n"
+                                                "\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->res->text);
                         break;
                 default:
                         break;
