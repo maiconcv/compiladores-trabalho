@@ -271,6 +271,8 @@ void tacPrintForwards(TAC* tac){
 }
 
 void generateASM(TAC* tac, FILE* fout){
+        static int functionCounter = 0;
+
         if(!tac) return;
 
         if(tac->prev)
@@ -284,16 +286,17 @@ void generateASM(TAC* tac, FILE* fout){
                                                  "\t.globl\t%s\n"
                                                  "\t.type\t%s, @function\n"
                                                  "%s:\n"
-                                                 ".LFB0:\n"
+                                                 ".LFB%d:\n"
                                                  "\tpushq\t%%rbp\n"
-                                                 "\tmovq\t%%rsp, %%rbp\n", tac->res->text, tac->res->text, tac->res->text); // it won't be 'LFB0' for all, there will be a counter
+                                                 "\tmovq\t%%rsp, %%rbp\n", tac->res->text, tac->res->text, tac->res->text, functionCounter);
                         break;
                 case TAC_ENDFUN: fprintf(fout, "## TAC_ENDFUN\n"
                                                 "\tmovl\t$0, %%eax\n"
                                                 "\tpopq\t%%rbp\n"
                                                 "\tret\n"
-                                                ".LFE0:\n"
-                                                "\t.size\t%s, .-%s\n", tac->res->text, tac->res->text);
+                                                ".LFE%d:\n"
+                                                "\t.size\t%s, .-%s\n", functionCounter, tac->res->text, tac->res->text);
+                        functionCounter++;
                         break;
                 case TAC_PRINT:
                         switch (tac->res->type) {
@@ -351,6 +354,17 @@ void generateASM(TAC* tac, FILE* fout){
                                                 "\tcltd\n"
                                                 "\tidivl\t%%ecx\n"
                                                 "\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->op2->text, tac->res->text);
+                        break;
+                case TAC_IFZ: fprintf(fout, "## TAC_IFZ\n"
+                                                "\tmovl\t_%s(%%rip), %%eax\n"
+                                                "\ttestl\t%%eax, %%eax\n"
+                                                "\tje\t.%s\n", tac->op1->text, tac->res->text);
+                        break;
+                case TAC_LABEL: fprintf(fout, "## TAC_LABEL\n"
+                                                ".%s:\n", tac->res->text);
+                        break;
+                case TAC_JUMP: fprintf(fout, "## TAC_JUMP\n"
+                                                "\tjmp\t.%s\n", tac->res->text);
                         break;
                 default:
                         break;
