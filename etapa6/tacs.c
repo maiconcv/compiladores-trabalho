@@ -1,11 +1,14 @@
 #include "tacs.h"
 
+AST* getRootAST();
+
 // INTERNAL PROTOTYPES
 TAC* makeBinOp(int type, TAC* code0, TAC* code1);
 TAC* makeIfThen(TAC* code0, TAC* code1);
 TAC* makeIfThenElse(TAC* code0, TAC* code1, TAC* code2);
 TAC* makeWhile(TAC* code0, TAC* code1);
 TAC* makeFor(HASH_NODE* var, TAC* code0, TAC* code1, TAC* code2, TAC* code3);
+HASH_NODE* findParam(AST* paramList, int currIteration, int n);
 
 TAC* tacCreate(int type, HASH_NODE* res, HASH_NODE* op1, HASH_NODE* op2){
         TAC* newtac;
@@ -366,7 +369,36 @@ void generateASM(TAC* tac, FILE* fout){
                 case TAC_JUMP: fprintf(fout, "## TAC_JUMP\n"
                                                 "\tjmp\t.%s\n", tac->res->text);
                         break;
+                case TAC_EQ: fprintf(fout, "## TAC_EQ\n"
+                                                "\tmovl\t_%s(%%rip), %%edx\n"
+                                        	"\tmovl\t_%s(%%rip), %%eax\n"
+                                        	"\tcmpl\t%%eax, %%edx\n"
+                                        	"\tsete\t%%al\n"
+                                        	"\tmovzbl\t%%al, %%eax\n"
+                                        	"\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->op2->text, tac->res->text);
+                        break;
+                case TAC_FUNCALL: fprintf(fout, "## TAC_FUNCALL\n"
+                                                "\tmovl\t$0, %%eax\n"
+                                                "\tcall\t%s\n", tac->op1->text);
+                        break;
+                case TAC_ARG:{
+                        AST* fundecl = findFunctionDeclaration(getRootAST(), tac->op1->text);
+                        HASH_NODE* param = findParam(fundecl->son[1], 1, atoi(tac->op2->text));
+                        fprintf(fout, "## TAC_ARG\n"
+                                        "\tmovl\t_%s(%%rip), %%eax\n"
+                                        "\tmovl\t%%eax, _%s(%%rip)\n", tac->res->text, param->text);
+                }
+                        break;
                 default:
                         break;
         }
+}
+
+HASH_NODE* findParam(AST* paramList, int currIteration, int n){
+        if(!paramList) return 0;
+
+        if(currIteration == n)
+                return paramList->son[0]->symbol;
+        else
+                return findParam(paramList->son[1], currIteration+1, n);
 }
