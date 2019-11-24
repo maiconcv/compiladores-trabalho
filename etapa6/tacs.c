@@ -383,6 +383,46 @@ void generateASM(TAC* tac, FILE* fout){
                                         	"\tmovzbl\t%%al, %%eax\n"
                                         	"\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->op2->text, tac->res->text);
                         break;
+                case TAC_DIF: fprintf(fout, "## TAC_DIF\n"
+                                                "\tmovl\t_%s(%%rip), %%edx\n"
+                                        	"\tmovl\t_%s(%%rip), %%eax\n"
+                                        	"\tcmpl\t%%eax, %%edx\n"
+                                        	"\tsetne\t%%al\n"
+                                        	"\tmovzbl\t%%al, %%eax\n"
+                                        	"\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->op2->text, tac->res->text);
+                        break;
+                case TAC_LT: fprintf(fout, "## TAC_LT\n"
+                                                "\tmovl\t_%s(%%rip), %%edx\n"
+                                        	"\tmovl\t_%s(%%rip), %%eax\n"
+                                        	"\tcmpl\t%%eax, %%edx\n"
+                                        	"\tsetl\t%%al\n"
+                                        	"\tmovzbl\t%%al, %%eax\n"
+                                        	"\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->op2->text, tac->res->text);
+                        break;
+                case TAC_GT: fprintf(fout, "## TAC_GT\n"
+                                                "\tmovl\t_%s(%%rip), %%edx\n"
+                                                "\tmovl\t_%s(%%rip), %%eax\n"
+                                                "\tcmpl\t%%eax, %%edx\n"
+                                                "\tsetg\t%%al\n"
+                                                "\tmovzbl\t%%al, %%eax\n"
+                                                "\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->op2->text, tac->res->text);
+                        break;
+                case TAC_LE: fprintf(fout, "## TAC_LE\n"
+                                                "\tmovl\t_%s(%%rip), %%edx\n"
+                                                "\tmovl\t_%s(%%rip), %%eax\n"
+                                                "\tcmpl\t%%eax, %%edx\n"
+                                                "\tsetle\t%%al\n"
+                                                "\tmovzbl\t%%al, %%eax\n"
+                                                "\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->op2->text, tac->res->text);
+                        break;
+                case TAC_GE: fprintf(fout, "## TAC_GE\n"
+                                                "\tmovl\t_%s(%%rip), %%edx\n"
+                                                "\tmovl\t_%s(%%rip), %%eax\n"
+                                                "\tcmpl\t%%eax, %%edx\n"
+                                                "\tsetge\t%%al\n"
+                                                "\tmovzbl\t%%al, %%eax\n"
+                                                "\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->op2->text, tac->res->text);
+                        break;
                 case TAC_FUNCALL: fprintf(fout, "## TAC_FUNCALL\n"
                                                 "\tmovl\t$0, %%eax\n"
                                                 "\tcall\t%s\n"
