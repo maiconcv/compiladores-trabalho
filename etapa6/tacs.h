@@ -51,7 +51,7 @@ TAC* tacCreate(int type, HASH_NODE* res, HASH_NODE* op1, HASH_NODE* op2);
 void tacPrintSingle(TAC* tac);
 void tacPrintBackwards(TAC* tac);
 TAC* tacJoin(TAC* l1, TAC* l2);
-TAC* generateCode(AST* ast, HASH_NODE* funCallName, int funArgCounter);
+TAC* generateCode(AST* ast, HASH_NODE* funCallName, int funArgCounter, HASH_NODE* labelLeaveFlowControlCmd);
 void tacPrintForwards(TAC* tac);
 void generateASM(TAC* tac, FILE* fout);
 

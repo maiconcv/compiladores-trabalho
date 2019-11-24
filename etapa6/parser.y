@@ -100,7 +100,7 @@ begin: programa					{ root = $1;
 						  checkUndeclared();
 						  checkOperands($1);
 						  fprintf(stderr, "%d semantic errors.\n", getSemanticErrors());
-						  tac = generateCode($1, 0, 0);
+						  tac = generateCode($1, 0, 0, 0);
 						  tacPrintForwards(tac);
 						  FILE* fout = fopen("asm.s", "w");
 						  generateASMGlobalVariablesFromLitValues(fout);

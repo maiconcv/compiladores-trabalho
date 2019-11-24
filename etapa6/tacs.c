@@ -6,8 +6,8 @@ AST* getRootAST();
 TAC* makeBinOp(int type, TAC* code0, TAC* code1);
 TAC* makeIfThen(TAC* code0, TAC* code1);
 TAC* makeIfThenElse(TAC* code0, TAC* code1, TAC* code2);
-TAC* makeWhile(TAC* code0, TAC* code1);
-TAC* makeFor(HASH_NODE* var, TAC* code0, TAC* code1, TAC* code2, TAC* code3);
+TAC* makeWhile(TAC* code0, TAC* code1, HASH_NODE* labelLeaveWhile);
+TAC* makeFor(HASH_NODE* var, TAC* code0, TAC* code1, TAC* code2, TAC* code3, HASH_NODE* labelLeaveFor);
 HASH_NODE* findParam(AST* paramList, int currIteration, int n);
 
 TAC* tacCreate(int type, HASH_NODE* res, HASH_NODE* op1, HASH_NODE* op2){
@@ -93,7 +93,7 @@ TAC* tacJoin(TAC* l1, TAC* l2){
         return l2;
 }
 
-TAC* generateCode(AST* ast, HASH_NODE* funCallName, int funArgCounter){
+TAC* generateCode(AST* ast, HASH_NODE* funCallName, int funArgCounter, HASH_NODE* labelLeaveFlowControlCmd){
         if(!ast) return 0;
 
         TAC* code[MAX_SONS];
@@ -101,6 +101,8 @@ TAC* generateCode(AST* ast, HASH_NODE* funCallName, int funArgCounter){
         HASH_NODE* currFunCall = 0;
         int currArgCounter = 0;
         HASH_NODE* currArgCounterSymbol = 0;
+
+        //HASH_NODE* labelLeaveFlowControlCmd = 0;
         if(ast->type == AST_FUNCALL){
                 currFunCall = ast->symbol;
                 currArgCounter = 0;
@@ -113,10 +115,14 @@ TAC* generateCode(AST* ast, HASH_NODE* funCallName, int funArgCounter){
                 sprintf(text, "%d", currArgCounter);
                 currArgCounterSymbol = hashInsert(text, SYMBOL_LITINT, 0);
         }
+        else if(ast->type == AST_WHILE || ast->type == AST_FOR){
+                labelLeaveFlowControlCmd = makeLabel();
+                //fprintf(stderr, "label criada %s\n", labelLeaveFlowControlCmd->text);
+        }
 
         // generate code for my sons first
         for(int i = 0; i < MAX_SONS; ++i)
-                code[i] = generateCode(ast->son[i], currFunCall, currArgCounter);
+                code[i] = generateCode(ast->son[i], currFunCall, currArgCounter, labelLeaveFlowControlCmd);
 
         // then process this node
         switch (ast->type) {
@@ -154,9 +160,9 @@ TAC* generateCode(AST* ast, HASH_NODE* funCallName, int funArgCounter){
                         break;
                 case AST_IFELSE: return makeIfThenElse(code[0], code[1], code[2]);
                         break;
-                case AST_WHILE: return makeWhile(code[0], code[1]);
+                case AST_WHILE: return makeWhile(code[0], code[1], labelLeaveFlowControlCmd);
                         break;
-                case AST_FOR: return makeFor(ast->symbol, code[0], code[1], code[2], code[3]);
+                case AST_FOR: return makeFor(ast->symbol, code[0], code[1], code[2], code[3], labelLeaveFlowControlCmd);
                         break;
                 case AST_READ: return tacCreate(TAC_READ, ast->symbol, 0, 0);
                         break;
@@ -196,7 +202,7 @@ TAC* generateCode(AST* ast, HASH_NODE* funCallName, int funArgCounter){
                         break;
                 case AST_FUNARG: return tacJoin(tacJoin(code[0], tacCreate(TAC_ARG, code[0]?code[0]->res:0, currFunCall, currArgCounterSymbol)), code[1]);
                         break;
-                case AST_BREAK: return tacCreate(TAC_BREAK, 0, 0, 0);
+                case AST_BREAK: return tacCreate(TAC_BREAK, labelLeaveFlowControlCmd, 0, 0);
                         break;
                 default: return tacJoin(tacJoin(tacJoin(code[0], code[1]), code[2]), code[3]);
                         break;
@@ -231,9 +237,9 @@ TAC* makeIfThenElse(TAC* code0, TAC* code1, TAC* code2){
         return tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(code0, tacif), code1), tacjump), taclabelFalse), code2), taclabelTrue);
 }
 
-TAC* makeWhile(TAC* code0, TAC* code1){
+TAC* makeWhile(TAC* code0, TAC* code1, HASH_NODE* labelLeaveWhile){
         HASH_NODE* labelBeforeWhile = makeLabel();
-        HASH_NODE* labelLeaveWhile = makeLabel();
+        //HASH_NODE* labelLeaveWhile = makeLabel();
         TAC* tacif = tacCreate(TAC_IFZ, labelLeaveWhile, code0?code0->res:0, 0);
         TAC* tacjump = tacCreate(TAC_JUMP, labelBeforeWhile, 0, 0);
         TAC* taclabelBeforeWhile = tacCreate(TAC_LABEL, labelBeforeWhile, 0, 0);
@@ -242,9 +248,9 @@ TAC* makeWhile(TAC* code0, TAC* code1){
         return tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(taclabelBeforeWhile, code0), tacif), code1), tacjump), taclabelLeaveWhile);
 }
 
-TAC* makeFor(HASH_NODE* var, TAC* code0, TAC* code1, TAC* code2, TAC* code3){
+TAC* makeFor(HASH_NODE* var, TAC* code0, TAC* code1, TAC* code2, TAC* code3, HASH_NODE* labelLeaveFor){
         HASH_NODE* labelBeforeFor = makeLabel();
-        HASH_NODE* labelLeaveFor = makeLabel();
+        //HASH_NODE* labelLeaveFor = makeLabel();
         HASH_NODE* compareResult = makeTemp();
 
         TAC* tacMoveInitValue = tacCreate(TAC_MOVE, var, code0?code0->res:0, 0);
@@ -294,7 +300,7 @@ void generateASM(TAC* tac, FILE* fout){
                                                  "\tmovq\t%%rsp, %%rbp\n", tac->res->text, tac->res->text, tac->res->text, functionCounter);
                         break;
                 case TAC_ENDFUN: fprintf(fout, "## TAC_ENDFUN\n"
-                                                "\tmovl\t$0, %%eax\n"
+                                                /*"\tmovl\t$0, %%eax\n"*/
                                                 "\tpopq\t%%rbp\n"
                                                 "\tret\n"
                                                 ".LFE%d:\n"
@@ -379,7 +385,8 @@ void generateASM(TAC* tac, FILE* fout){
                         break;
                 case TAC_FUNCALL: fprintf(fout, "## TAC_FUNCALL\n"
                                                 "\tmovl\t$0, %%eax\n"
-                                                "\tcall\t%s\n", tac->op1->text);
+                                                "\tcall\t%s\n"
+                                                "\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->res->text);
                         break;
                 case TAC_ARG:{
                         AST* fundecl = findFunctionDeclaration(getRootAST(), tac->op1->text);
@@ -387,6 +394,14 @@ void generateASM(TAC* tac, FILE* fout){
                         fprintf(fout, "## TAC_ARG\n"
                                         "\tmovl\t_%s(%%rip), %%eax\n"
                                         "\tmovl\t%%eax, _%s(%%rip)\n", tac->res->text, param->text);
+                }
+                        break;
+                case TAC_RETURN: fprintf(fout, "## TAC_RETURN\n"
+                                                "\tmovl\t_%s(%%rip), %%eax\n", tac->res->text);
+                        break;
+                case TAC_BREAK: if(tac->res != 0){
+                        fprintf(fout, "## TAC_BREAK\n"
+                                        "\tjmp\t.%s\n", tac->res->text);
                 }
                         break;
                 default:
