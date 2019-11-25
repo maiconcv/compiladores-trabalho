@@ -330,7 +330,7 @@ void generateASM(TAC* tac, FILE* fout){
                                         fprintf(fout, "## TAC_PRINT_VAR\n"
                                                         "\tmovl\t_%s(%%rip), %%eax\n"
                                                         "\tmovl\t%%eax, %%esi\n"
-                                                        "\tleaq\t_LC0(%%rip), %%rdi\n"
+                                                        "\tleaq\tLC0(%%rip), %%rdi\n"
                                                         "\tmovl\t$0, %%eax\n"
                                                         "\tcall\tprintf@PLT\n", tac->res->text);
                                         break;
@@ -497,6 +497,12 @@ void generateASM(TAC* tac, FILE* fout){
                         fprintf(fout, "## TAC_BREAK\n"
                                         "\tjmp\t.%s\n", tac->res->text);
                 }
+                        break;
+                case TAC_READ: fprintf(fout, "## TAC_READ\n"
+                                                "\tleaq\t_%s(%%rip), %%rsi\n"
+                                        	"\tleaq\tLC0(%%rip), %%rdi\n"
+                                        	"\tmovl\t$0, %%eax\n"
+                                        	"\tcall\t__isoc99_scanf@PLT\n", tac->res->text);
                         break;
                 default:
                         break;

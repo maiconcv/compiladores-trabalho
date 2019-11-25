@@ -82,6 +82,9 @@ HASH_NODE* makeLabel(void){
 void generateASMGlobalVariablesFromLitValues(FILE* fout){
         static int stringCounter = 0;
 
+	fprintf(fout, "\t.section\t.rodata\n"
+			"LC0:\t.string \"%%d\"\n");
+
         for(int i = 0; i < HASH_SIZE; i++){
                 for(HASH_NODE* node = Table[i]; node; node = node->next){
                         if(node){
