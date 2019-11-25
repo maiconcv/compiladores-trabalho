@@ -38,6 +38,8 @@
 #define TAC_ARG 30
 #define TAC_BREAK 31
 
+#define LABEL_LOGIC_OP "LB"
+
 typedef struct tac_node {
 	int type;
 	HASH_NODE* res;

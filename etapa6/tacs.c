@@ -281,6 +281,7 @@ void tacPrintForwards(TAC* tac){
 
 void generateASM(TAC* tac, FILE* fout){
         static int functionCounter = 0;
+        static int logicOpLabelCounter = 0;
 
         if(!tac) return;
 
@@ -422,6 +423,59 @@ void generateASM(TAC* tac, FILE* fout){
                                                 "\tsetge\t%%al\n"
                                                 "\tmovzbl\t%%al, %%eax\n"
                                                 "\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->op2->text, tac->res->text);
+                        break;
+                case TAC_AND: fprintf(fout, "## TAC_AND\n"
+                                                "\tmovl\t_%s(%%rip), %%eax\n"
+                                                "\ttestl\t%%eax, %%eax\n"
+                                                "\tje\t.%s%d\n"
+                                                "\tmovl\t_%s(%%rip), %%eax\n"
+                                        	"\ttestl\t%%eax, %%eax\n"
+                                        	"\tje\t.%s%d\n"
+                                        	"\tmovl\t$1, %%eax\n"
+                                        	"\tjmp\t.%s%d\n"
+                                                ".%s%d:\n"
+                                        	"\tmovl\t$0, %%eax\n"
+                                                ".%s%d:\n"
+                                        	"\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text,
+                                                                                LABEL_LOGIC_OP, logicOpLabelCounter,
+                                                                                tac->op2->text,
+                                                                                LABEL_LOGIC_OP, logicOpLabelCounter,
+                                                                                LABEL_LOGIC_OP, logicOpLabelCounter+1,
+                                                                                LABEL_LOGIC_OP, logicOpLabelCounter,
+                                                                                LABEL_LOGIC_OP, logicOpLabelCounter+1,
+                                                                                tac->res->text);
+                        logicOpLabelCounter += 2;
+                        break;
+                case TAC_OR: fprintf(fout, "## TAC_OR\n"
+                                                "\tmovl\t_%s(%%rip), %%eax\n"
+                                        	"\ttestl\t%%eax, %%eax\n"
+                                        	"\tjne\t.%s%d\n"
+                                        	"\tmovl\t_%s(%%rip), %%eax\n"
+                                        	"\ttestl\t%%eax, %%eax\n"
+                                        	"\tje\t.%s%d\n"
+                                                ".%s%d:\n"
+                                        	"\tmovl\t$1, %%eax\n"
+                                        	"\tjmp\t.%s%d\n"
+                                                ".%s%d:\n"
+                                        	"\tmovl\t$0, %%eax\n"
+                                                ".%s%d:\n"
+                                        	"\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text,
+                                                                                LABEL_LOGIC_OP, logicOpLabelCounter,
+                                                                                tac->op2->text,
+                                                                                LABEL_LOGIC_OP, logicOpLabelCounter+1,
+                                                                                LABEL_LOGIC_OP, logicOpLabelCounter,
+                                                                                LABEL_LOGIC_OP, logicOpLabelCounter+2,
+                                                                                LABEL_LOGIC_OP, logicOpLabelCounter+1,
+                                                                                LABEL_LOGIC_OP, logicOpLabelCounter+2,
+                                                                                tac->res->text);
+                        logicOpLabelCounter += 3;
+                        break;
+                case TAC_NOT: fprintf(fout, "## TAC_NOT\n"
+                                                "\tmovl\t_%s(%%rip), %%eax\n"
+                                        	"\ttestl\t%%eax, %%eax\n"
+                                        	"\tsete\t%%al\n"
+                                        	"\tmovzbl\t%%al, %%eax\n"
+                                        	"\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->res->text);
                         break;
                 case TAC_FUNCALL: fprintf(fout, "## TAC_FUNCALL\n"
                                                 "\tmovl\t$0, %%eax\n"
