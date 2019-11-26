@@ -83,7 +83,9 @@ void generateASMGlobalVariablesFromLitValues(FILE* fout){
         static int stringCounter = 0;
 
 	fprintf(fout, "\t.section\t.rodata\n"
-			"LC0:\t.string \"%%d\"\n");
+			"LC0:\t.string \"%%d\"\n"
+			"TRUE:\t.string \"TRUE\"\n"
+			"FALSE:\t.string \"FALSE\"\n");
 
         for(int i = 0; i < HASH_SIZE; i++){
                 for(HASH_NODE* node = Table[i]; node; node = node->next){
@@ -104,10 +106,6 @@ void generateASMGlobalVariablesFromLitValues(FILE* fout){
 							"_%s%d:\t.byte\t%d\n", LITCHAR_VAR_NAME, stringCounter, (int)(node->text[1]));
 					stringCounter++;
                                 }
-				else if(node->type == SYMBOL_LITBOOL){
-					fprintf(fout, "\t.section\t.rodata\n"
-							"%s:\t.string\t\"%s\"\n", node->text, node->text);
-				}
 				else if(node->type == SYMBOL_TEMP){
 					fprintf(fout, "\t.data\n"
 							"_%s:\t.long\t 0\n", node->text);
