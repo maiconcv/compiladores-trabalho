@@ -363,6 +363,11 @@ void generateASM(TAC* tac, FILE* fout){
                                                                 "\tcall\tprintf@PLT\n", tac->res->text);
                                                         break;
                                                 case DATATYPE_BYTE:
+                                                        fprintf(fout, "## TAC_PRINT_VAR_CHAR\n"
+                                                                        "\tmovzbl\t_%s(%%rip), %%eax\n"
+                                                                        "\tmovsbl\t%%al, %%eax\n"
+                                                                        "\tmovl\t%%eax, %%edi\n"
+                                                                        "\tcall\tputchar@PLT\n", tac->res->text);
                                                         break;
                                                 case DATATYPE_BOOL:
                                                         fprintf(fout, "## TAC_PRINT_VAR_BOOL\n"
@@ -387,9 +392,20 @@ void generateASM(TAC* tac, FILE* fout){
                                         break;
                         }
                         break;
-                case TAC_MOVE: fprintf(fout, "## TAC_MOVE\n"
+                case TAC_MOVE:{
+                        HASH_NODE* data = hashFind(tac->op1->text);
+                        if(data->type == SYMBOL_LITCHAR){
+                                int counter = findCounter(tac->op1->text);
+                                fprintf(fout, "## TAC_MOVE\n"
+                                                "\tmovl\t_%s%d(%%rip), %%eax\n"
+                                                "\tmovl\t%%eax, _%s(%%rip)\n", LITCHAR_VAR_NAME, counter, tac->res->text);
+                        }
+                        else{
+                                fprintf(fout, "## TAC_MOVE\n"
                                                 "\tmovl\t_%s(%%rip), %%eax\n"
                                                 "\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->res->text);
+                        }
+                }
                         break;
                 case TAC_ADD: fprintf(fout, "## TAC_ADD\n"
                                                 "\tmovl\t_%s(%%rip), %%edx\n"
