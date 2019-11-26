@@ -350,6 +350,15 @@ void generateASM(TAC* tac, FILE* fout){
                                                         "\tcall\tputchar@PLT\n", LITCHAR_VAR_NAME, counter);
                                         break;
                                 }
+                                case SYMBOL_LITINT: fprintf(fout, "## TAC_PRINT_LITINT\n"
+                                                                "\tmovl\t_%s(%%rip), %%esi\n"
+                                                                "\tleaq\tLC0(%%rip), %%rdi\n"
+                                                                "\tcall\tprintf@PLT\n", tac->res->text);
+                                        break;
+                                case SYMBOL_LITBOOL: fprintf(fout, "## TAC_PRINT_LITBOOL\n"
+                                                                "\tleaq\t%s(%%rip), %%rdi\n"
+                                                                "\tcall\tprintf@PLT\n", tac->res->text);
+                                        break;
                                 case SYMBOL_SCALAR:{
                                         HASH_NODE* var = hashFind(tac->res->text);
                                         switch (var->datatype) {
@@ -393,8 +402,7 @@ void generateASM(TAC* tac, FILE* fout){
                         }
                         break;
                 case TAC_MOVE:{
-                        HASH_NODE* data = hashFind(tac->op1->text);
-                        if(data->type == SYMBOL_LITCHAR){
+                        if(tac->op1->type == SYMBOL_LITCHAR){
                                 int counter = findCounter(tac->op1->text);
                                 fprintf(fout, "## TAC_MOVE\n"
                                                 "\tmovl\t_%s%d(%%rip), %%eax\n"
