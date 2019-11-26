@@ -104,6 +104,10 @@ void generateASMGlobalVariablesFromLitValues(FILE* fout){
 							"_%s%d:\t.byte\t%d\n", LITCHAR_VAR_NAME, stringCounter, (int)(node->text[1]));
 					stringCounter++;
                                 }
+				else if(node->type == SYMBOL_LITBOOL){
+					fprintf(fout, "\t.section\t.rodata\n"
+							"%s:\t.string\t\"%s\"\n", node->text, node->text);
+				}
 				else if(node->type == SYMBOL_TEMP){
 					fprintf(fout, "\t.data\n"
 							"_%s:\t.long\t 0\n", node->text);

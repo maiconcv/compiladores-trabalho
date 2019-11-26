@@ -289,8 +289,32 @@ void generateASM(TAC* tac, FILE* fout){
                 generateASM(tac->prev, fout);
 
         switch (tac->type) {
-                case TAC_VARDECL: fprintf(fout, "\n\t.data\n"
-                                                "_%s:\t.long\t%s\n", tac->res->text, tac->op1->text); // won't be 'long' for all, type will come from hash
+                case TAC_VARDECL:{
+                        HASH_NODE* var = hashFind(tac->res->text);
+                        switch (var->datatype) {
+                                case DATATYPE_INT:
+                                case DATATYPE_LONG:
+                                        fprintf(fout, "\n\t.data\n"
+                                                        "_%s:\t.long\t%s\n", tac->res->text, tac->op1->text);
+                                        break;
+                                case DATATYPE_BYTE:
+                                        fprintf(fout, "\n\t.data\n"
+                                                        "_%s:\t.long\t%d\n", tac->res->text, (int)(tac->op1->text[1]));
+                                        break;
+                                case DATATYPE_BOOL:{
+                                        int value = 0;
+                                        if(strcmp(tac->op1->text, "TRUE") == 0)
+                                                value = 1;
+                                        fprintf(fout, "\n\t.data\n"
+                                                        "_%s:\t.long\t%d\n", tac->res->text, value);
+                                }
+                                        break;
+                                case DATATYPE_FLOAT:
+                                        break;
+                                default:
+                                        break;
+                        }
+                }
                         break;
                 case TAC_BEGINFUN: fprintf(fout, "\n## TAC_BEGINFUN\n"
                                                  "\t.globl\t%s\n"
@@ -326,13 +350,40 @@ void generateASM(TAC* tac, FILE* fout){
                                                         "\tcall\tputchar@PLT\n", LITCHAR_VAR_NAME, counter);
                                         break;
                                 }
-                                case SYMBOL_SCALAR:
-                                        fprintf(fout, "## TAC_PRINT_VAR\n"
-                                                        "\tmovl\t_%s(%%rip), %%eax\n"
-                                                        "\tmovl\t%%eax, %%esi\n"
-                                                        "\tleaq\tLC0(%%rip), %%rdi\n"
-                                                        "\tmovl\t$0, %%eax\n"
-                                                        "\tcall\tprintf@PLT\n", tac->res->text);
+                                case SYMBOL_SCALAR:{
+                                        HASH_NODE* var = hashFind(tac->res->text);
+                                        switch (var->datatype) {
+                                                case DATATYPE_INT:
+                                                case DATATYPE_LONG:
+                                                        fprintf(fout, "## TAC_PRINT_VAR\n"
+                                                                "\tmovl\t_%s(%%rip), %%eax\n"
+                                                                "\tmovl\t%%eax, %%esi\n"
+                                                                "\tleaq\tLC0(%%rip), %%rdi\n"
+                                                                "\tmovl\t$0, %%eax\n"
+                                                                "\tcall\tprintf@PLT\n", tac->res->text);
+                                                        break;
+                                                case DATATYPE_BYTE:
+                                                        break;
+                                                case DATATYPE_BOOL:
+                                                        fprintf(fout, "## TAC_PRINT_VAR_BOOL\n"
+                                                                "\tmovl\t_%s(%%rip), %%eax\n"
+                                                                "\ttestl\t%%eax, %%eax\n"
+                                                                "\tje\t.%s%d\n"
+                                                                "\tleaq\tTRUE(%%rip), %%rdi\n"
+                                                                "\tcall\tprintf@PLT\n"
+                                                                "\tjmp\t.%s%d\n"
+                                                                ".%s%d:\n"
+                                                                "\tleaq\tFALSE(%%rip), %%rdi\n"
+                                                                "\tcall\tprintf@PLT\n"
+                                                                ".%s%d:\n", tac->res->text,
+                                                                                LABEL_LOGIC_OP, logicOpLabelCounter,
+                                                                                LABEL_LOGIC_OP, logicOpLabelCounter+1,
+                                                                                LABEL_LOGIC_OP, logicOpLabelCounter,
+                                                                                LABEL_LOGIC_OP, logicOpLabelCounter+1);
+                                                        logicOpLabelCounter += 2;
+                                                        break;
+                                        }
+                                }
                                         break;
                         }
                         break;
