@@ -1,5 +1,7 @@
 #include "tacs.h"
 
+int vectorSizeFlag = 0;
+
 AST* getRootAST();
 
 // INTERNAL PROTOTYPES
@@ -178,7 +180,14 @@ TAC* generateCode(AST* ast, HASH_NODE* funCallName, int funArgCounter, HASH_NODE
                         break;
                 case AST_VARDECL: return tacCreate(TAC_VARDECL, ast->symbol, code[1]?code[1]->res:0, 0);
                         break;
-                case AST_VECTDECL: return tacJoin(tacJoin(code[1], tacCreate(TAC_VECTDECL, ast->symbol, code[1]?code[1]->res:0, 0)), code[2]);
+                case AST_VECTDECL:{
+                        HASH_NODE* hasInitValues;
+                        if(code[2] == 0)
+                                hasInitValues = hashInsert("0", SYMBOL_LITINT, 0);
+                        else
+                                hasInitValues = hashInsert("1", SYMBOL_LITINT, 0);
+                        return tacJoin(tacJoin(code[1], tacCreate(TAC_VECTDECL, ast->symbol, code[1]?code[1]->res:0, hasInitValues)), code[2]);
+                }
                         break;
                 case AST_VECTINIT: return code[0];
                         break;
@@ -578,6 +587,30 @@ void generateASM(TAC* tac, FILE* fout){
                                         	"\tleaq\tLC0(%%rip), %%rdi\n"
                                         	"\tmovl\t$0, %%eax\n"
                                         	"\tcall\t__isoc99_scanf@PLT\n", tac->res->text);
+                        break;
+                case TAC_VECTDECL:{
+                        int hasInitValues = atoi(tac->op2->text);
+                        if(hasInitValues){
+                                fprintf(fout, "\n\t.data\n"
+                                                "_%s:\n", tac->res->text);
+                                vectorSizeFlag = atoi(tac->op1->text);
+                        }
+                        else{
+                                fprintf(fout, "\n\t.data\n"
+                                                "\t.comm\t%s,%s\n", tac->res->text, tac->op1->text);
+                        }
+                }
+                        break;
+                case TAC_SYMBOL:
+                        if(vectorSizeFlag > 0){
+                                fprintf(fout, "\t.long\t%s\n", tac->res->text);
+                                vectorSizeFlag--;
+                        }
+                        break;
+                case TAC_VECTREAD: fprintf(fout, "## TAC_VECTREAD\n"
+                                                "\tmovl\t%d+_%s(%%rip), %%eax\n"
+                                                "\tmovl\t%%eax, _%s(%%rip)\n", atoi(tac->op2->text)*4, tac->op1->text,
+                                                                                tac->res->text);
                         break;
                 default:
                         break;
