@@ -106,7 +106,8 @@ void checkOperands(AST* node){
 
 			    	   (node->son[i]->type == AST_SYMBOL &&
 				    (node->son[i]->symbol->type == SYMBOL_LITINT ||
-			    	     node->son[i]->symbol->type == SYMBOL_LITREAL)) ||
+			    	     node->son[i]->symbol->type == SYMBOL_LITREAL ||
+			     	     node->son[i]->symbol->type == SYMBOL_LITCHAR)) ||
 
 			     	   (node->son[i]->type == AST_VECTREAD &&
 				    node->son[i]->symbol->type == SYMBOL_VECTOR &&
