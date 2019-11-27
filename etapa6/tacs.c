@@ -1,5 +1,10 @@
 #include "tacs.h"
 
+typedef struct operands{
+        char* op1;
+        char* op2;
+} OPERANDS;
+
 int vectorSizeFlag = 0;
 
 AST* getRootAST();
@@ -11,6 +16,8 @@ TAC* makeIfThenElse(TAC* code0, TAC* code1, TAC* code2);
 TAC* makeWhile(TAC* code0, TAC* code1, HASH_NODE* labelLeaveWhile);
 TAC* makeFor(HASH_NODE* var, TAC* code0, TAC* code1, TAC* code2, TAC* code3, HASH_NODE* labelLeaveFor);
 HASH_NODE* findParam(AST* paramList, int currIteration, int n);
+char* findLitCharFullVarName(char* litchar);
+OPERANDS fillOperands(HASH_NODE* op1, HASH_NODE* op2);
 
 TAC* tacCreate(int type, HASH_NODE* res, HASH_NODE* op1, HASH_NODE* op2){
         TAC* newtac;
@@ -429,30 +436,42 @@ void generateASM(TAC* tac, FILE* fout){
                         }
                 }
                         break;
-                case TAC_ADD: fprintf(fout, "## TAC_ADD\n"
-                                                "\tmovl\t_%s(%%rip), %%edx\n"
-                                                "\tmovl\t_%s(%%rip), %%eax\n"
-                                                "\taddl\t%%edx, %%eax\n"
-                                                "\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->op2->text, tac->res->text);
+                case TAC_ADD:{
+                        OPERANDS op = fillOperands(tac->op1, tac->op2);
+                        fprintf(fout, "## TAC_ADD\n"
+                                        "\tmovl\t_%s(%%rip), %%edx\n"
+                                        "\tmovl\t_%s(%%rip), %%eax\n"
+                                        "\taddl\t%%edx, %%eax\n"
+                                        "\tmovl\t%%eax, _%s(%%rip)\n", op.op1, op.op2, tac->res->text);
+                }
                         break;
-                case TAC_SUB: fprintf(fout, "## TAC_SUB\n"
-                                                "\tmovl\t_%s(%%rip), %%edx\n"
-                                                "\tmovl\t_%s(%%rip), %%eax\n"
-                                                "\tsubl\t%%eax, %%edx\n"
-                                                "\tmovl\t%%edx, _%s(%%rip)\n", tac->op1->text, tac->op2->text, tac->res->text);
+                case TAC_SUB:{
+                        OPERANDS op = fillOperands(tac->op1, tac->op2);
+                        fprintf(fout, "## TAC_SUB\n"
+                                        "\tmovl\t_%s(%%rip), %%edx\n"
+                                        "\tmovl\t_%s(%%rip), %%eax\n"
+                                        "\tsubl\t%%eax, %%edx\n"
+                                        "\tmovl\t%%edx, _%s(%%rip)\n", op.op1, op.op2, tac->res->text);
+                }
                         break;
-                case TAC_MUL: fprintf(fout, "## TAC_MUL\n"
-                                                "\tmovl\t_%s(%%rip), %%edx\n"
-                                                "\tmovl\t_%s(%%rip), %%eax\n"
-                                                "\timull\t%%edx, %%eax\n"
-                                                "\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->op2->text, tac->res->text);
+                case TAC_MUL:{
+                        OPERANDS op = fillOperands(tac->op1, tac->op2);
+                        fprintf(fout, "## TAC_MUL\n"
+                                        "\tmovl\t_%s(%%rip), %%edx\n"
+                                        "\tmovl\t_%s(%%rip), %%eax\n"
+                                        "\timull\t%%edx, %%eax\n"
+                                        "\tmovl\t%%eax, _%s(%%rip)\n", op.op1, op.op2, tac->res->text);
+                }
                         break;
-                case TAC_DIV: fprintf(fout, "## TAC_DIV\n"
-                                                "\tmovl\t_%s(%%rip), %%eax\n"
-                                                "\tmovl\t_%s(%%rip), %%ecx\n"
-                                                "\tcltd\n"
-                                                "\tidivl\t%%ecx\n"
-                                                "\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->op2->text, tac->res->text);
+                case TAC_DIV:{
+                        OPERANDS op = fillOperands(tac->op1, tac->op2);
+                        fprintf(fout, "## TAC_DIV\n"
+                                        "\tmovl\t_%s(%%rip), %%eax\n"
+                                        "\tmovl\t_%s(%%rip), %%ecx\n"
+                                        "\tcltd\n"
+                                        "\tidivl\t%%ecx\n"
+                                        "\tmovl\t%%eax, _%s(%%rip)\n", op.op1, op.op2, tac->res->text);
+                }
                         break;
                 case TAC_IFZ: fprintf(fout, "## TAC_IFZ\n"
                                                 "\tmovl\t_%s(%%rip), %%eax\n"
@@ -640,4 +659,32 @@ HASH_NODE* findParam(AST* paramList, int currIteration, int n){
                 return paramList->son[0]->symbol;
         else
                 return findParam(paramList->son[1], currIteration+1, n);
+}
+
+char* findLitCharFullVarName(char* litchar){
+        int counter = findCounter(litchar);
+        char* varName = (char*)malloc(sizeof(LITCHAR_VAR_NAME) + sizeof(counter));
+        strcpy(varName, LITCHAR_VAR_NAME);
+
+        char num[10];
+        sprintf(num, "%d", counter);
+        strcat(varName, num);
+
+        fprintf(stderr, "%s\n", varName);
+        return varName;
+}
+
+OPERANDS fillOperands(HASH_NODE* op1, HASH_NODE* op2){
+        OPERANDS op;
+        if(op1->type == SYMBOL_LITCHAR)
+                op.op1 = findLitCharFullVarName(op1->text);
+        else
+                op.op1 = op1->text;
+
+        if(op2->type == SYMBOL_LITCHAR)
+                op.op2 = findLitCharFullVarName(op2->text);
+        else
+                op.op2 = op2->text;
+
+        return op;
 }

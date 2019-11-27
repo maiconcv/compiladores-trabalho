@@ -103,7 +103,7 @@ void generateASMGlobalVariablesFromLitValues(FILE* fout){
                                 else if(node->type == SYMBOL_LITCHAR){
 					addMatch(node->text, stringCounter);
                                         fprintf(fout, "\t.section\t.rodata\n"
-							"_%s%d:\t.byte\t%d\n", LITCHAR_VAR_NAME, stringCounter, (int)(node->text[1]));
+							"_%s%d:\t.long\t%d\n", LITCHAR_VAR_NAME, stringCounter, (int)(node->text[1]));
 					stringCounter++;
                                 }
 				else if(node->type == SYMBOL_TEMP){
