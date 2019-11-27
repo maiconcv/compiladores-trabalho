@@ -613,14 +613,20 @@ void generateASM(TAC* tac, FILE* fout){
                         }
                         break;
                 case TAC_VECTREAD: fprintf(fout, "## TAC_VECTREAD\n"
-                                                "\tmovl\t%d+_%s(%%rip), %%eax\n"
-                                                "\tmovl\t%%eax, _%s(%%rip)\n", atoi(tac->op2->text)*4, tac->op1->text,
-                                                                                tac->res->text); // *4 for int, other types may not be 4
+                                                "\tmovl\t_%s(%%rip), %%eax\n"
+                                        	"\tcltq\n"
+                                        	"\tleaq\t0(,%%rax,4), %%rdx\n"
+                                        	"\tleaq\t_%s(%%rip), %%rax\n"
+                                        	"\tmovl\t(%%rdx,%%rax), %%eax\n"
+                                        	"\tmovl\t%%eax, _%s(%%rip)\n", tac->op2->text, tac->op1->text, tac->res->text); // 4 for int, other types may not be 4
                         break;
                 case TAC_MOVEVECT: fprintf(fout, "## TAC_MOVEVECT\n"
                                                 "\tmovl\t_%s(%%rip), %%eax\n"
-                                                "\tmovl\t%%eax, %d+_%s(%%rip)\n", tac->op2->text,
-                                                                                atoi(tac->op1->text)*4, tac->res->text); // *4 for int, other type may not be 4
+                                        	"\tmovl\t_%s(%%rip), %%edx\n"
+                                        	"\tcltq\n"
+                                        	"\tleaq\t0(,%%rax,4), %%rcx\n"
+                                        	"\tleaq\t_%s(%%rip), %%rax\n"
+                                        	"\tmovl\t%%edx, (%%rcx,%%rax)\n", tac->op1->text, tac->op2->text, tac->res->text); // 4 for int, other types may not be 4
                         break;
                 default:
                         break;
