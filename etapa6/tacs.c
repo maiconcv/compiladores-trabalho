@@ -688,7 +688,6 @@ char* findLitCharFullVarName(char* litchar){
         sprintf(num, "%d", counter);
         strcat(varName, num);
 
-        fprintf(stderr, "%s\n", varName);
         return varName;
 }
 
