@@ -199,7 +199,11 @@ TAC* generateCode(AST* ast, HASH_NODE* funCallName, int funArgCounter, HASH_NODE
                         break;
                 case AST_VECTASSIGN: return tacJoin(tacJoin(code[0], code[1]), tacCreate(TAC_MOVEVECT, ast->symbol, code[0]?code[0]->res:0, code[1]?code[1]->res:0));
                         break;
-                case AST_VECTREAD: return tacJoin(code[0], tacCreate(TAC_VECTREAD, makeTemp(), ast->symbol, code[0]?code[0]->res:0));
+                case AST_VECTREAD:{
+                        HASH_NODE* result = makeTemp();
+                        result->datatype = ast->symbol->datatype;
+                        return tacJoin(code[0], tacCreate(TAC_VECTREAD, result, ast->symbol, code[0]?code[0]->res:0));
+                }
                         break;
                 case AST_BRACKETS: return code[0];
                         break;
@@ -368,6 +372,7 @@ void generateASM(TAC* tac, FILE* fout){
                                                                 "\tleaq\t%s(%%rip), %%rdi\n"
                                                                 "\tcall\tprintf@PLT\n", tac->res->text);
                                         break;
+                                case SYMBOL_TEMP:
                                 case SYMBOL_SCALAR:{
                                         HASH_NODE* var = hashFind(tac->res->text);
                                         switch (var->datatype) {
@@ -610,7 +615,12 @@ void generateASM(TAC* tac, FILE* fout){
                 case TAC_VECTREAD: fprintf(fout, "## TAC_VECTREAD\n"
                                                 "\tmovl\t%d+_%s(%%rip), %%eax\n"
                                                 "\tmovl\t%%eax, _%s(%%rip)\n", atoi(tac->op2->text)*4, tac->op1->text,
-                                                                                tac->res->text);
+                                                                                tac->res->text); // *4 for int, other types may not be 4
+                        break;
+                case TAC_MOVEVECT: fprintf(fout, "## TAC_MOVEVECT\n"
+                                                "\tmovl\t_%s(%%rip), %%eax\n"
+                                                "\tmovl\t%%eax, %d+_%s(%%rip)\n", tac->op2->text,
+                                                                                atoi(tac->op1->text)*4, tac->res->text); // *4 for int, other type may not be 4
                         break;
                 default:
                         break;
