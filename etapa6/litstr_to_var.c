@@ -17,3 +17,18 @@ int findCounter(char* text){
         }
         return 0;
 }
+
+int floatToBinaryToInt(char* text){
+        float f = strtof(text, 0);
+        int* p = (int*)&f;
+
+        /*for(int i = sizeof(int)*8 - 1; i >= 0; i--)
+                printf("%d", (*p) >> i & 1);*/
+
+        int answer = 0;
+        for(int i = 0; i < sizeof(int)*8 - 1; i++)
+                answer += ((*p) >> i & 1) * pow(2, i);
+        //printf("\n%d\n", answer);
+
+        return answer;
+}

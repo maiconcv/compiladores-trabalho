@@ -8,7 +8,7 @@
 #
 
 etapa6: y.tab.o lex.yy.o main.o hash.o astree.o semantic.o tacs.o litstr_to_var.o
-	gcc -o etapa6 y.tab.o lex.yy.o main.o hash.o astree.o semantic.o tacs.o litstr_to_var.o -Wall
+	gcc -o etapa6 y.tab.o lex.yy.o main.o hash.o astree.o semantic.o tacs.o litstr_to_var.o -Wall -lm
 
 y.tab.o: y.tab.c
 	gcc -c y.tab.c -Wall

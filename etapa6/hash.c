@@ -84,6 +84,7 @@ void generateASMGlobalVariablesFromLitValues(FILE* fout){
 
 	fprintf(fout, "\t.section\t.rodata\n"
 			"LC0:\t.string \"%%d\"\n"
+			"LC1:\t.string \"%%f\"\n"
 			"TRUE:\t.string \"TRUE\"\n"
 			"FALSE:\t.string \"FALSE\"\n");
 
@@ -106,6 +107,11 @@ void generateASMGlobalVariablesFromLitValues(FILE* fout){
 							"_%s%d:\t.long\t%d\n", LITCHAR_VAR_NAME, stringCounter, (int)(node->text[1]));
 					stringCounter++;
                                 }
+				else if(node->type == SYMBOL_LITREAL){
+					addMatch(node->text, stringCounter);
+					fprintf(fout, "\t.section\t.rodata\n"
+							"_%s%d:\t.long\t%d\n", LITFLOAT_VAR_NAME, stringCounter, floatToBinaryToInt(node->text));
+				}
 				else if(node->type == SYMBOL_TEMP){
 					fprintf(fout, "\t.data\n"
 							"_%s:\t.long\t 0\n", node->text);

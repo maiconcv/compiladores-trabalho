@@ -329,7 +329,11 @@ void generateASM(TAC* tac, FILE* fout){
                                                         "_%s:\t.long\t%d\n", tac->res->text, value);
                                 }
                                         break;
-                                case DATATYPE_FLOAT:
+                                case DATATYPE_FLOAT:{
+                                        int num = floatToBinaryToInt(tac->op1->text);
+                                        fprintf(fout, "\n\t.data\n"
+                                                        "_%s:\t.long\t%d\n", tac->res->text, num);
+                                }
                                         break;
                                 default:
                                         break;
@@ -379,6 +383,16 @@ void generateASM(TAC* tac, FILE* fout){
                                                                 "\tleaq\t%s(%%rip), %%rdi\n"
                                                                 "\tcall\tprintf@PLT\n", tac->res->text);
                                         break;
+                                case SYMBOL_LITREAL:{
+                                        int counter = findCounter(tac->res->text);
+                                        fprintf(fout, "## TAC_PRINT_LITREAL\n"
+                                                        "\tmovss\t_%s%d(%%rip), %%xmm0\n"
+                                                        "\tcvtss2sd\t%%xmm0, %%xmm0\n"
+                                                        "\tleaq\tLC1(%%rip), %%rdi\n"
+                                                        "\tmovl\t$1, %%eax\n"
+                                                        "\tcall\tprintf@PLT\n", LITFLOAT_VAR_NAME, counter);
+                                }
+                                        break;
                                 case SYMBOL_TEMP:
                                 case SYMBOL_SCALAR:{
                                         HASH_NODE* var = hashFind(tac->res->text);
@@ -416,6 +430,14 @@ void generateASM(TAC* tac, FILE* fout){
                                                                                 LABEL_LOGIC_OP, logicOpLabelCounter,
                                                                                 LABEL_LOGIC_OP, logicOpLabelCounter+1);
                                                         logicOpLabelCounter += 2;
+                                                        break;
+                                                case DATATYPE_FLOAT:
+                                                        fprintf(fout, "## TAC_PRINT_VAR_FLOAT\n"
+                                                                        "\tmovss\t_%s(%%rip), %%xmm0\n"
+                                                                	"\tcvtss2sd\t%%xmm0, %%xmm0\n"
+                                                                	"\tleaq\tLC1(%%rip), %%rdi\n"
+                                                                	"\tmovl\t$1, %%eax\n"
+                                                                	"\tcall\tprintf@PLT\n", tac->res->text);
                                                         break;
                                         }
                                 }
