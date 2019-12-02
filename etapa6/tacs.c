@@ -16,8 +16,9 @@ TAC* makeIfThenElse(TAC* code0, TAC* code1, TAC* code2);
 TAC* makeWhile(TAC* code0, TAC* code1, HASH_NODE* labelLeaveWhile);
 TAC* makeFor(HASH_NODE* var, TAC* code0, TAC* code1, TAC* code2, TAC* code3, HASH_NODE* labelLeaveFor);
 HASH_NODE* findParam(AST* paramList, int currIteration, int n);
-char* findLitCharFullVarName(char* litchar);
+char* findLitCharFullVarName(char* text, const char* varName);
 OPERANDS fillOperands(HASH_NODE* op1, HASH_NODE* op2);
+void loadVarsIntoCorrectRegisters(FILE* fout, HASH_NODE* op1, HASH_NODE* op2, OPERANDS op);
 
 TAC* tacCreate(int type, HASH_NODE* res, HASH_NODE* op1, HASH_NODE* op2){
         TAC* newtac;
@@ -231,7 +232,10 @@ TAC* generateCode(AST* ast, HASH_NODE* funCallName, int funArgCounter, HASH_NODE
 }
 
 TAC* makeBinOp(int type, TAC* code0, TAC* code1){
-        return tacJoin(tacJoin(code0, code1), tacCreate(type, makeTemp(), code0?code0->res:0, code1?code1->res:0));
+        HASH_NODE* temp = makeTemp();
+        if(type == TAC_ADD || type == TAC_SUB || type == TAC_MUL || type == TAC_DIV)
+                temp->datatype = DATATYPE_FLOAT;
+        return tacJoin(tacJoin(code0, code1), tacCreate(type, temp, code0?code0->res:0, code1?code1->res:0));
 }
 
 TAC* makeIfThen(TAC* code0, TAC* code1){
@@ -445,26 +449,75 @@ void generateASM(TAC* tac, FILE* fout){
                         }
                         break;
                 case TAC_MOVE:{
-                        if(tac->op1->type == SYMBOL_LITCHAR){
+                        fprintf(fout, "## TAC_MOVE\n");
+                        if(tac->op1->type == SYMBOL_LITCHAR){ // case var = litchar;
                                 int counter = findCounter(tac->op1->text);
-                                fprintf(fout, "## TAC_MOVE\n"
-                                                "\tmovl\t_%s%d(%%rip), %%eax\n"
-                                                "\tmovl\t%%eax, _%s(%%rip)\n", LITCHAR_VAR_NAME, counter, tac->res->text);
+                                if(tac->res->datatype == DATATYPE_FLOAT){ // case floatVar = litchar;
+                                        fprintf(fout, "\tmovl\t_%s%d(%%rip), %%eax\n"
+                                                        "\tcvtsi2ss\t%%eax, %%xmm0\n"
+                                                        "\tmovss\t%%xmm0, _%s(%%rip)\n", LITCHAR_VAR_NAME, counter, tac->res->text);
+                                }
+                                else{ // case nonfloatVar = litchar;
+                                        fprintf(fout, "\tmovl\t_%s%d(%%rip), %%eax\n"
+                                                        "\tmovl\t%%eax, _%s(%%rip)\n", LITCHAR_VAR_NAME, counter, tac->res->text);
+                                }
                         }
-                        else{
-                                fprintf(fout, "## TAC_MOVE\n"
-                                                "\tmovl\t_%s(%%rip), %%eax\n"
-                                                "\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->res->text);
+                        else if(tac->op1->type == SYMBOL_LITREAL){
+                                int counter = findCounter(tac->op1->text);
+                                if(tac->res->datatype == DATATYPE_FLOAT){ // case floatVar = litreal;
+                                        fprintf(fout, "\tmovss\t_%s%d(%%rip), %%xmm0\n"
+                                                        //"\tcvtsi2ss\t%%eax, %%xmm0\n"
+                                                        "\tmovss\t%%xmm0, _%s(%%rip)\n", LITFLOAT_VAR_NAME, counter, tac->res->text);
+                                }
+                                else{ // case nonfloatVar = litreal;
+                                        fprintf(fout, "\tmovss\t_%s%d(%%rip), %%xmm0\n"
+                                                        "\tcvttss2si\t%%xmm0, %%eax\n"
+                                                        "\tmovl\t%%eax, _%s(%%rip)\n", LITFLOAT_VAR_NAME, counter, tac->res->text);
+                                }
+                        }
+                        else if(tac->op1->type == SYMBOL_SCALAR && tac->op1->datatype == DATATYPE_BYTE){ // case var = byteVar;
+                                if(tac->res->datatype == DATATYPE_FLOAT){ // case floatVar = byteVar;
+                                        fprintf(fout, "\tmovl\t_%s(%%rip), %%eax\n"
+                                                        "\tcvtsi2ss\t%%eax, %%xmm0\n"
+                                                        "\tmovss\t%%xmm0, _%s(%%rip)\n", tac->op1->text, tac->res->text);
+                                }
+                                else{ // case nonfloatVar = byteVar;
+                                        fprintf(fout, "\tmovl\t_%s(%%rip), %%eax\n"
+                                                        "\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->res->text);
+                                }
+                        }
+                        else{ // any other case
+                                if(tac->res->datatype == DATATYPE_FLOAT){ // case floatVar = any;
+                                        if(tac->op1->datatype == DATATYPE_FLOAT){ // case floatVar = floatData; (var, temp)
+                                                fprintf(fout, "\tmovss\t_%s(%%rip), %%xmm0\n"
+                                                                "\tmovss\t%%xmm0, _%s(%%rip)\n", tac->op1->text, tac->res->text);
+                                        }
+                                        else{
+                                                fprintf(fout, "\tmovl\t_%s(%%rip), %%eax\n"
+                                                                "\tcvtsi2ss\t%%eax, %%xmm0\n"
+                                                                "\tmovss\t%%xmm0, _%s(%%rip)\n", tac->op1->text, tac->res->text);
+                                        }
+                                }
+                                else{
+                                        if(tac->op1->datatype == DATATYPE_FLOAT){ // case nonFloatVar = floatData; (lit, var, temp)
+                                                fprintf(fout, "\tmovss\t_%s(%%rip), %%xmm0\n"
+                                                                "\tcvttss2si\t%%xmm0, %%eax\n"
+                                                                "\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->res->text);
+                                        }
+                                        else{ // case nonFloatVar = any;
+                                                fprintf(fout, "\tmovl\t_%s(%%rip), %%eax\n"
+                                                                "\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->res->text);
+                                        }
+                                }
                         }
                 }
                         break;
                 case TAC_ADD:{
                         OPERANDS op = fillOperands(tac->op1, tac->op2);
-                        fprintf(fout, "## TAC_ADD\n"
-                                        "\tmovl\t_%s(%%rip), %%edx\n"
-                                        "\tmovl\t_%s(%%rip), %%eax\n"
-                                        "\taddl\t%%edx, %%eax\n"
-                                        "\tmovl\t%%eax, _%s(%%rip)\n", op.op1, op.op2, tac->res->text);
+                        fprintf(fout, "## TAC_ADD\n");
+                        loadVarsIntoCorrectRegisters(fout, tac->op1, tac->op2, op);
+                        fprintf(fout, "\taddss\t%%xmm1, %%xmm0\n"
+                	               "\tmovss\t%%xmm0, _%s(%%rip)\n", tac->res->text);
                 }
                         break;
                 case TAC_SUB:{
@@ -701,29 +754,53 @@ HASH_NODE* findParam(AST* paramList, int currIteration, int n){
                 return findParam(paramList->son[1], currIteration+1, n);
 }
 
-char* findLitCharFullVarName(char* litchar){
-        int counter = findCounter(litchar);
-        char* varName = (char*)malloc(sizeof(LITCHAR_VAR_NAME) + sizeof(counter));
-        strcpy(varName, LITCHAR_VAR_NAME);
+char* findLitValueFullVarName(char* text, const char* varName){
+        int counter = findCounter(text);
+        char* varFullName = (char*)malloc(sizeof(varName) + sizeof(counter));
+        strcpy(varFullName, varName);
 
         char num[10];
         sprintf(num, "%d", counter);
-        strcat(varName, num);
+        strcat(varFullName, num);
 
-        return varName;
+        return varFullName;
 }
 
 OPERANDS fillOperands(HASH_NODE* op1, HASH_NODE* op2){
         OPERANDS op;
         if(op1->type == SYMBOL_LITCHAR)
-                op.op1 = findLitCharFullVarName(op1->text);
+                op.op1 = findLitValueFullVarName(op1->text, LITCHAR_VAR_NAME);
+        else if(op1->type == SYMBOL_LITREAL)
+                op.op1 = findLitValueFullVarName(op1->text, LITFLOAT_VAR_NAME);
         else
                 op.op1 = op1->text;
 
         if(op2->type == SYMBOL_LITCHAR)
-                op.op2 = findLitCharFullVarName(op2->text);
+                op.op2 = findLitValueFullVarName(op2->text, LITCHAR_VAR_NAME);
+        else if(op2->type == SYMBOL_LITREAL)
+                op.op2 = findLitValueFullVarName(op2->text, LITFLOAT_VAR_NAME);
         else
                 op.op2 = op2->text;
 
         return op;
+}
+
+void loadVarsIntoCorrectRegisters(FILE* fout, HASH_NODE* op1, HASH_NODE* op2, OPERANDS op){
+        if(op1->type == SYMBOL_LITREAL ||
+           ((op1->type == SYMBOL_SCALAR || op1->type == SYMBOL_TEMP) && op1->datatype == DATATYPE_FLOAT)){
+                fprintf(fout, "\tmovss\t_%s(%%rip), %%xmm0\n", op.op1);
+        }
+        else{
+                fprintf(fout, "\tmovl\t_%s(%%rip), %%eax\n"
+                                "\tcvtsi2ss\t%%eax, %%xmm0\n", op.op1);
+        }
+
+        if(op2->type == SYMBOL_LITREAL ||
+           ((op2->type == SYMBOL_SCALAR || op2->type == SYMBOL_TEMP) && op2->datatype == DATATYPE_FLOAT)){
+                fprintf(fout, "\tmovss\t_%s(%%rip), %%xmm1\n", op.op2);
+        }
+        else{
+                fprintf(fout, "\tmovl\t_%s(%%rip), %%edx\n"
+                                "\tcvtsi2ss\t%%edx, %%xmm1\n", op.op2);
+        }
 }

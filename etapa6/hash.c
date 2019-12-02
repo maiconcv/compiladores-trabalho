@@ -86,7 +86,9 @@ void generateASMGlobalVariablesFromLitValues(FILE* fout){
 			"LC0:\t.string \"%%d\"\n"
 			"LC1:\t.string \"%%f\"\n"
 			"TRUE:\t.string \"TRUE\"\n"
-			"FALSE:\t.string \"FALSE\"\n");
+			"FALSE:\t.string \"FALSE\"\n"
+			"_TRUE:\t.long 1\n"
+			"_FALSE:\t.long 0\n");
 
         for(int i = 0; i < HASH_SIZE; i++){
                 for(HASH_NODE* node = Table[i]; node; node = node->next){
@@ -111,6 +113,7 @@ void generateASMGlobalVariablesFromLitValues(FILE* fout){
 					addMatch(node->text, stringCounter);
 					fprintf(fout, "\t.section\t.rodata\n"
 							"_%s%d:\t.long\t%d\n", LITFLOAT_VAR_NAME, stringCounter, floatToBinaryToInt(node->text));
+					stringCounter++;
 				}
 				else if(node->type == SYMBOL_TEMP){
 					fprintf(fout, "\t.data\n"
