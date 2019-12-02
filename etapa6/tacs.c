@@ -556,68 +556,68 @@ void generateASM(TAC* tac, FILE* fout){
                         break;
                 case TAC_EQ:{
                         OPERANDS op = fillOperands(tac->op1, tac->op2);
-                        fprintf(fout, "## TAC_EQ\n"
-                                        "\tmovl\t_%s(%%rip), %%edx\n"
-                                        "\tmovl\t_%s(%%rip), %%eax\n"
-                                        "\tcmpl\t%%eax, %%edx\n"
-                                        "\tsete\t%%al\n"
-                                        "\tmovzbl\t%%al, %%eax\n"
-                                        "\tmovl\t%%eax, _%s(%%rip)\n", op.op1, op.op2, tac->res->text);
+                        fprintf(fout, "## TAC_EQ\n");
+                        loadVarsIntoCorrectRegisters(fout, tac->op1, tac->op2, op);
+                        fprintf(fout, "\tucomiss\t%%xmm1, %%xmm0\n"
+                	               "\tsetnp\t%%al\n"
+                	               "\tmovl\t$0, %%edx\n"
+                	               "\tucomiss\t%%xmm1, %%xmm0\n"
+                	               "\tcmovne\t%%edx, %%eax\n"
+                	               "\tmovzbl\t%%al, %%eax\n"
+                	               "\tmovl\t%%eax, _%s(%%rip)\n", tac->res->text);
                 }
                         break;
                 case TAC_DIF:{
                         OPERANDS op = fillOperands(tac->op1, tac->op2);
-                        fprintf(fout, "## TAC_DIF\n"
-                                        "\tmovl\t_%s(%%rip), %%edx\n"
-                                        "\tmovl\t_%s(%%rip), %%eax\n"
-                                        "\tcmpl\t%%eax, %%edx\n"
-                                        "\tsetne\t%%al\n"
-                                        "\tmovzbl\t%%al, %%eax\n"
-                                        "\tmovl\t%%eax, _%s(%%rip)\n", op.op1, op.op2, tac->res->text);
+                        fprintf(fout, "## TAC_DIF\n");
+                        loadVarsIntoCorrectRegisters(fout, tac->op1, tac->op2, op);
+                        fprintf(fout, "\tucomiss\t%%xmm1, %%xmm0\n"
+                	               "\tsetp\t%%al\n"
+                	               "\tmovl\t$1, %%edx\n"
+                	               "\tucomiss\t%%xmm1, %%xmm0\n"
+                	               "\tcmovne\t%%edx, %%eax\n"
+                	               "\tmovzbl\t%%al, %%eax\n"
+                	               "\tmovl\t%%eax, _%s(%%rip)\n", tac->res->text);
                 }
                         break;
                 case TAC_LT:{
                         OPERANDS op = fillOperands(tac->op1, tac->op2);
-                        fprintf(fout, "## TAC_LT\n"
-                                        "\tmovl\t_%s(%%rip), %%edx\n"
-                                        "\tmovl\t_%s(%%rip), %%eax\n"
-                                        "\tcmpl\t%%eax, %%edx\n"
-                                        "\tsetl\t%%al\n"
+                        fprintf(fout, "## TAC_LT\n");
+                        loadVarsIntoCorrectRegisters(fout, tac->op1, tac->op2, op);
+                        fprintf(fout, "\tucomiss\t%%xmm0, %%xmm1\n"
+                                        "\tseta\t%%al\n"
                                         "\tmovzbl\t%%al, %%eax\n"
-                                        "\tmovl\t%%eax, _%s(%%rip)\n", op.op1, op.op2, tac->res->text);
+                                        "\tmovl\t%%eax, _%s(%%rip)\n", tac->res->text);
                 }
                         break;
                 case TAC_GT:{
                         OPERANDS op = fillOperands(tac->op1, tac->op2);
-                        fprintf(fout, "## TAC_GT\n"
-                                        "\tmovl\t_%s(%%rip), %%edx\n"
-                                        "\tmovl\t_%s(%%rip), %%eax\n"
-                                        "\tcmpl\t%%eax, %%edx\n"
-                                        "\tsetg\t%%al\n"
+                        fprintf(fout, "## TAC_GT\n");
+                        loadVarsIntoCorrectRegisters(fout, tac->op1, tac->op2, op);
+                        fprintf(fout, "\tucomiss\t%%xmm1, %%xmm0\n"
+                                        "\tseta\t%%al\n"
                                         "\tmovzbl\t%%al, %%eax\n"
-                                        "\tmovl\t%%eax, _%s(%%rip)\n", op.op1, op.op2, tac->res->text);
+                                        "\tmovl\t%%eax, _%s(%%rip)\n", tac->res->text);
                 }
                         break;
                 case TAC_LE:{
                         OPERANDS op = fillOperands(tac->op1, tac->op2);
-                        fprintf(fout, "## TAC_LE\n"
-                                        "\tmovl\t_%s(%%rip), %%edx\n"
-                                        "\tmovl\t_%s(%%rip), %%eax\n"
-                                        "\tcmpl\t%%eax, %%edx\n"
-                                        "\tsetle\t%%al\n"
+                        fprintf(fout, "## TAC_LE\n");
+                        loadVarsIntoCorrectRegisters(fout, tac->op1, tac->op2, op);
+                        fprintf(fout, "\tucomiss\t%%xmm0, %%xmm1\n"
+                                        "\tsetnb\t%%al\n"
                                         "\tmovzbl\t%%al, %%eax\n"
-                                        "\tmovl\t%%eax, _%s(%%rip)\n", op.op1, op.op2, tac->res->text);
+                                        "\tmovl\t%%eax, _%s(%%rip)\n", tac->res->text);
                 }
                         break;
                 case TAC_GE:{
                         OPERANDS op = fillOperands(tac->op1, tac->op2);
-                        fprintf(fout, "## TAC_GE\n"
-                                        "\tmovl\t_%s(%%rip), %%edx\n"
-                                        "\tmovl\t_%s(%%rip), %%eax\n"
-                                        "\tcmpl\t%%eax, %%edx\n"
-                                        "\tsetge\t%%al\n"
+                        fprintf(fout, "## TAC_GT\n");
+                        loadVarsIntoCorrectRegisters(fout, tac->op1, tac->op2, op);
+                        fprintf(fout, "\tucomiss\t%%xmm1, %%xmm0\n"
+                                        "\tsetnb\t%%al\n"
                                         "\tmovzbl\t%%al, %%eax\n"
-                                        "\tmovl\t%%eax, _%s(%%rip)\n", op.op1, op.op2, tac->res->text);
+                                        "\tmovl\t%%eax, _%s(%%rip)\n", tac->res->text);
                 }
                         break;
                 case TAC_AND: fprintf(fout, "## TAC_AND\n"
