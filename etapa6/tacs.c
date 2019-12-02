@@ -466,7 +466,6 @@ void generateASM(TAC* tac, FILE* fout){
                                 int counter = findCounter(tac->op1->text);
                                 if(tac->res->datatype == DATATYPE_FLOAT){ // case floatVar = litreal;
                                         fprintf(fout, "\tmovss\t_%s%d(%%rip), %%xmm0\n"
-                                                        //"\tcvtsi2ss\t%%eax, %%xmm0\n"
                                                         "\tmovss\t%%xmm0, _%s(%%rip)\n", LITFLOAT_VAR_NAME, counter, tac->res->text);
                                 }
                                 else{ // case nonfloatVar = litreal;
@@ -492,7 +491,7 @@ void generateASM(TAC* tac, FILE* fout){
                                                 fprintf(fout, "\tmovss\t_%s(%%rip), %%xmm0\n"
                                                                 "\tmovss\t%%xmm0, _%s(%%rip)\n", tac->op1->text, tac->res->text);
                                         }
-                                        else{
+                                        else{ // case floatVar = nonfloatData;
                                                 fprintf(fout, "\tmovl\t_%s(%%rip), %%eax\n"
                                                                 "\tcvtsi2ss\t%%eax, %%xmm0\n"
                                                                 "\tmovss\t%%xmm0, _%s(%%rip)\n", tac->op1->text, tac->res->text);
@@ -522,30 +521,26 @@ void generateASM(TAC* tac, FILE* fout){
                         break;
                 case TAC_SUB:{
                         OPERANDS op = fillOperands(tac->op1, tac->op2);
-                        fprintf(fout, "## TAC_SUB\n"
-                                        "\tmovl\t_%s(%%rip), %%edx\n"
-                                        "\tmovl\t_%s(%%rip), %%eax\n"
-                                        "\tsubl\t%%eax, %%edx\n"
-                                        "\tmovl\t%%edx, _%s(%%rip)\n", op.op1, op.op2, tac->res->text);
+                        fprintf(fout, "## TAC_SUB\n");
+                        loadVarsIntoCorrectRegisters(fout, tac->op1, tac->op2, op);
+                        fprintf(fout, "\tsubss\t%%xmm1, %%xmm0\n"
+                	               "\tmovss\t%%xmm0, _%s(%%rip)\n", tac->res->text);
                 }
                         break;
                 case TAC_MUL:{
                         OPERANDS op = fillOperands(tac->op1, tac->op2);
-                        fprintf(fout, "## TAC_MUL\n"
-                                        "\tmovl\t_%s(%%rip), %%edx\n"
-                                        "\tmovl\t_%s(%%rip), %%eax\n"
-                                        "\timull\t%%edx, %%eax\n"
-                                        "\tmovl\t%%eax, _%s(%%rip)\n", op.op1, op.op2, tac->res->text);
+                        fprintf(fout, "## TAC_MUL\n");
+                        loadVarsIntoCorrectRegisters(fout, tac->op1, tac->op2, op);
+                        fprintf(fout, "\tmulss\t%%xmm1, %%xmm0\n"
+                	               "\tmovss\t%%xmm0, _%s(%%rip)\n", tac->res->text);
                 }
                         break;
                 case TAC_DIV:{
                         OPERANDS op = fillOperands(tac->op1, tac->op2);
-                        fprintf(fout, "## TAC_DIV\n"
-                                        "\tmovl\t_%s(%%rip), %%eax\n"
-                                        "\tmovl\t_%s(%%rip), %%ecx\n"
-                                        "\tcltd\n"
-                                        "\tidivl\t%%ecx\n"
-                                        "\tmovl\t%%eax, _%s(%%rip)\n", op.op1, op.op2, tac->res->text);
+                        fprintf(fout, "## TAC_DIV\n");
+                        loadVarsIntoCorrectRegisters(fout, tac->op1, tac->op2, op);
+                        fprintf(fout, "\tdivss\t%%xmm1, %%xmm0\n"
+                	               "\tmovss\t%%xmm0, _%s(%%rip)\n", tac->res->text);
                 }
                         break;
                 case TAC_IFZ: fprintf(fout, "## TAC_IFZ\n"
