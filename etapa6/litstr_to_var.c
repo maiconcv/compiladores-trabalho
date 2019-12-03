@@ -4,7 +4,7 @@ int nextEmptyPos = 0;
 LITSTR_TO_VAR match[1000];
 
 void addMatch(char* text, int counter){
-        match[nextEmptyPos].text = (char*)malloc(sizeof(text));
+        match[nextEmptyPos].text = (char*)malloc(strlen(text)*sizeof(char)+1);
         strcpy(match[nextEmptyPos].text, text);
         match[nextEmptyPos].counter = counter;
         nextEmptyPos++;

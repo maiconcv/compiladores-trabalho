@@ -698,9 +698,52 @@ void generateASM(TAC* tac, FILE* fout){
                 case TAC_ARG:{
                         AST* fundecl = findFunctionDeclaration(getRootAST(), tac->op1->text);
                         HASH_NODE* param = findParam(fundecl->son[1], 1, atoi(tac->op2->text));
-                        fprintf(fout, "## TAC_ARG\n"
-                                        "\tmovl\t_%s(%%rip), %%eax\n"
-                                        "\tmovl\t%%eax, _%s(%%rip)\n", tac->res->text, param->text);
+
+                        fprintf(fout, "## TAC_ARG\n");
+                        if(param->datatype == DATATYPE_FLOAT){
+                                if(tac->res->type == SYMBOL_LITREAL){
+                                        int counter = findCounter(tac->res->text);
+                                        fprintf(fout, "\tmovss\t_%s%d(%%rip), %%xmm0\n"
+                                                        "\tmovss\t%%xmm0, _%s(%%rip)\n", LITFLOAT_VAR_NAME, counter, param->text);
+                                }
+                                else if(tac->res->type == SYMBOL_LITCHAR){
+                                        int counter = findCounter(tac->res->text);
+                                        fprintf(fout, "\tmovl\t_%s%d(%%rip), %%eax\n"
+                                                        "\tcvtsi2ss\t%%eax, %%xmm0\n"
+                                                        "\tmovss\t%%xmm0, _%s(%%rip)\n", LITCHAR_VAR_NAME, counter, param->text);
+                                }
+                                else if(tac->res->datatype == DATATYPE_FLOAT){
+                                        fprintf(fout, "\tmovss\t_%s(%%rip), %%xmm0\n"
+                                                        "\tmovss\t%%xmm0, _%s(%%rip)\n", tac->res->text, param->text);
+                                }
+                                else{
+                                        fprintf(fout, "\tmovl\t_%s(%%rip), %%eax\n"
+                                                        "\tcvtsi2ss\t%%eax, %%xmm0\n"
+                                                        "\tmovss\t%%xmm0, _%s(%%rip)\n", tac->res->text, param->text);
+                                }
+                        }
+                        else{
+                                if(tac->res->type == SYMBOL_LITREAL){
+                                        int counter = findCounter(tac->res->text);
+                                        fprintf(fout, "\tmovss\t_%s%d(%%rip), %%xmm0\n"
+                                                        "\tcvttss2si\t%%xmm0, %%eax\n"
+                                                        "\tmovl\t%%eax, _%s(%%rip)\n", LITFLOAT_VAR_NAME, counter, param->text);
+                                }
+                                else if(tac->res->type == SYMBOL_LITCHAR){
+                                        int counter = findCounter(tac->res->text);
+                                        fprintf(fout, "\tmovl\t_%s%d(%%rip), %%eax\n"
+                                                        "\tmovl\t%%eax, _%s(%%rip)\n", LITCHAR_VAR_NAME, counter, param->text);
+                                }
+                                else if(tac->res->datatype == DATATYPE_FLOAT){
+                                        fprintf(fout, "\tmovss\t_%s(%%rip), %%xmm0\n"
+                                                        "\tcvttss2si\t%%xmm0, %%eax\n"
+                                                        "\tmovl\t%%eax, _%s(%%rip)\n", tac->res->text, param->text);
+                                }
+                                else{
+                                        fprintf(fout, "\tmovl\t_%s(%%rip), %%eax\n"
+                                                        "\tmovl\t%%eax, _%s(%%rip)\n", tac->res->text, param->text);
+                                }
+                        }
                 }
                         break;
                 case TAC_RETURN:{
@@ -750,10 +793,18 @@ void generateASM(TAC* tac, FILE* fout){
                 }
                         break;
                 case TAC_READ: fprintf(fout, "## TAC_READ\n"
-                                                "\tleaq\t_%s(%%rip), %%rsi\n"
-                                        	"\tleaq\tLC0(%%rip), %%rdi\n"
-                                        	"\tmovl\t$0, %%eax\n"
-                                        	"\tcall\t__isoc99_scanf@PLT\n", tac->res->text);
+                                                "\tleaq\t_%s(%%rip), %%rsi\n", tac->res->text);
+                        if(tac->res->datatype == DATATYPE_FLOAT){
+                                fprintf(fout, "\tleaq\tLC1(%%rip), %%rdi\n");
+                        }
+                        else if(tac->res->datatype == DATATYPE_BYTE){
+                                fprintf(fout, "\tleaq\tLC2(%%rip), %%rdi\n");
+                        }
+                        else{
+                                fprintf(fout, "\tleaq\tLC0(%%rip), %%rdi\n");
+                        }
+                        fprintf(fout, "\tmovl\t$0, %%eax\n"
+                                        "\tcall\t__isoc99_scanf@PLT\n");
                         break;
                 case TAC_VECTDECL:{
                         int hasInitValues = atoi(tac->op2->text);

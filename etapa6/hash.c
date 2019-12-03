@@ -85,6 +85,7 @@ void generateASMGlobalVariablesFromLitValues(FILE* fout){
 	fprintf(fout, "\t.section\t.rodata\n"
 			"LC0:\t.string \"%%d\"\n"
 			"LC1:\t.string \"%%f\"\n"
+			"LC2:\t.string \" %%c\"\n"
 			"TRUE:\t.string \"TRUE\"\n"
 			"FALSE:\t.string \"FALSE\"\n"
 			"_TRUE:\t.long 1\n"
