@@ -6,6 +6,7 @@ typedef struct operands{
 } OPERANDS;
 
 int vectorSizeFlag = 0;
+int vectorDatatype = 0;
 
 AST* getRootAST();
 
@@ -706,6 +707,7 @@ void generateASM(TAC* tac, FILE* fout){
                                 fprintf(fout, "\n\t.data\n"
                                                 "_%s:\n", tac->res->text);
                                 vectorSizeFlag = atoi(tac->op1->text);
+                                vectorDatatype = tac->res->datatype;
                         }
                         else{
                                 fprintf(fout, "\n\t.data\n"
@@ -715,7 +717,12 @@ void generateASM(TAC* tac, FILE* fout){
                         break;
                 case TAC_SYMBOL:
                         if(vectorSizeFlag > 0){
-                                fprintf(fout, "\t.long\t%s\n", tac->res->text);
+                                if(vectorDatatype == DATATYPE_FLOAT){
+                                        int num = floatToBinaryToInt(tac->res->text);
+                                        fprintf(fout, "\t.long\t%d\n", num);
+                                }
+                                else
+                                        fprintf(fout, "\t.long\t%s\n", tac->res->text);
                                 vectorSizeFlag--;
                         }
                         break;
@@ -727,13 +734,75 @@ void generateASM(TAC* tac, FILE* fout){
                                         	"\tmovl\t(%%rdx,%%rax), %%eax\n"
                                         	"\tmovl\t%%eax, _%s(%%rip)\n", tac->op2->text, tac->op1->text, tac->res->text); // 4 for int, other types may not be 4
                         break;
-                case TAC_MOVEVECT: fprintf(fout, "## TAC_MOVEVECT\n"
-                                                "\tmovl\t_%s(%%rip), %%eax\n"
-                                        	"\tmovl\t_%s(%%rip), %%edx\n"
-                                        	"\tcltq\n"
-                                        	"\tleaq\t0(,%%rax,4), %%rcx\n"
-                                        	"\tleaq\t_%s(%%rip), %%rax\n"
-                                        	"\tmovl\t%%edx, (%%rcx,%%rax)\n", tac->op1->text, tac->op2->text, tac->res->text); // 4 for int, other types may not be 4
+                case TAC_MOVEVECT:{
+                        fprintf(fout, "## TAC_MOVEVECT\n");
+
+                        // index
+                        if(tac->op1->type == SYMBOL_LITREAL){
+                                int counter = findCounter(tac->op1->text);
+                                fprintf(fout, "\tmovss\t_%s%d(%%rip), %%xmm0\n"
+                                                "\tcvttss2si\t%%xmm0, %%eax\n", LITFLOAT_VAR_NAME, counter);
+                        }
+                        else if((tac->op1->type == SYMBOL_SCALAR || tac->op1->type == SYMBOL_TEMP) && tac->op1->datatype == DATATYPE_FLOAT){
+                                fprintf(fout, "\tmovss\t_%s(%%rip), %%xmm0\n"
+                                                "\tcvttss2si\t%%xmm0, %%eax\n", tac->op1->text);
+                        }
+                        else if(tac->op1->type == SYMBOL_LITCHAR){
+                                int counter = findCounter(tac->op1->text);
+                                fprintf(fout, "\tmovl\t_%s%d(%%rip), %%eax\n", LITCHAR_VAR_NAME, counter);
+                        }
+                        else{
+                                fprintf(fout, "\tmovl\t_%s(%%rip), %%eax\n", tac->op1->text);
+                        }
+
+                        // value
+                        if(tac->res->datatype == DATATYPE_FLOAT){
+                                if(tac->op2->type == SYMBOL_LITREAL){
+                                        int counter = findCounter(tac->op2->text);
+                                        fprintf(fout, "\tmovss\t_%s%d(%%rip), %%xmm1\n", LITFLOAT_VAR_NAME, counter);
+                                }
+                                else if((tac->op2->type == SYMBOL_SCALAR || tac->op2->type == SYMBOL_TEMP) && tac->op2->datatype == DATATYPE_FLOAT){
+                                        fprintf(fout, "\tmovss\t_%s(%%rip), %%xmm1\n", tac->op2->text);
+                                }
+                                else if(tac->op2->type == SYMBOL_LITCHAR){
+                                        int counter = findCounter(tac->op2->text);
+                                        fprintf(fout, "\tmovl\t_%s%d(%%rip), %%edx\n"
+                                                        "\tcvtsi2ss\t%%edx, %%xmm1\n", LITCHAR_VAR_NAME, counter);
+                                }
+                                else{
+                                        fprintf(fout, "\tmovl\t_%s(%%rip), %%edx\n"
+                                                        "\tcvtsi2ss\t%%edx, %%xmm1\n", tac->op2->text);
+                                }
+
+                                fprintf(fout, "\tcltq\n"
+                        	               "leaq\t0(,%%rax,4), %%rdx\n"
+                        	               "leaq\t_%s(%%rip), %%rax\n"
+                        	               "\tmovss\t%%xmm1, (%%rdx,%%rax)\n", tac->res->text);
+                        }
+                        else{
+                                if(tac->op2->type == SYMBOL_LITREAL){
+                                        int counter = findCounter(tac->op2->text);
+                                        fprintf(fout, "\tmovss\t_%s%d(%%rip), %%xmm1\n"
+                                                        "\tcvttss2si\t%%xmm1, %%edx\n", LITFLOAT_VAR_NAME, counter);
+                                }
+                                else if((tac->op2->type == SYMBOL_SCALAR || tac->op2->type == SYMBOL_TEMP) && tac->op2->datatype == DATATYPE_FLOAT){
+                                        fprintf(fout, "\tmovss\t_%s(%%rip), %%xmm1\n"
+                                                        "\tcvttss2si\t%%xmm1, %%edx\n", tac->op2->text);
+                                }
+                                else if(tac->op2->type == SYMBOL_LITCHAR){
+                                        int counter = findCounter(tac->op2->text);
+                                        fprintf(fout, "\tmovl\t_%s%d(%%rip), %%edx\n", LITCHAR_VAR_NAME, counter);
+                                }
+                                else{
+                                        fprintf(fout, "\tmovl\t_%s(%%rip), %%edx\n", tac->op2->text);
+                                }
+
+                                fprintf(fout, "\tcltq\n"
+                                                "\tleaq\t0(,%%rax,4), %%rcx\n"
+                                                "\tleaq\t_%s(%%rip), %%rax\n"
+                                                "\tmovl\t%%edx, (%%rcx,%%rax)\n", tac->res->text);
+                        }
+                }
                         break;
                 default:
                         break;
