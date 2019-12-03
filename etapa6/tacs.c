@@ -7,6 +7,7 @@ typedef struct operands{
 
 int vectorSizeFlag = 0;
 int vectorDatatype = 0;
+int funcallDatatype = 0;
 
 AST* getRootAST();
 
@@ -220,7 +221,12 @@ TAC* generateCode(AST* ast, HASH_NODE* funCallName, int funArgCounter, HASH_NODE
                         break;
                 case AST_LDECL: return tacJoin(code[0], code[1]);
                         break;
-                case AST_FUNCALL: return tacJoin(code[0], tacCreate(TAC_FUNCALL, makeTemp(), ast->symbol, 0));
+                case AST_FUNCALL:{
+                        HASH_NODE* temp = makeTemp();
+                        HASH_NODE* func = hashFind(ast->symbol->text);
+                        temp->datatype = func->datatype;
+                        return tacJoin(code[0], tacCreate(TAC_FUNCALL, temp, ast->symbol, 0));
+                }
                         break;
                 case AST_FUNARG: return tacJoin(tacJoin(code[0], tacCreate(TAC_ARG, code[0]?code[0]->res:0, currFunCall, currArgCounterSymbol)), code[1]);
                         break;
@@ -674,10 +680,20 @@ void generateASM(TAC* tac, FILE* fout){
                                         	"\tmovzbl\t%%al, %%eax\n"
                                         	"\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->res->text);
                         break;
-                case TAC_FUNCALL: fprintf(fout, "## TAC_FUNCALL\n"
-                                                "\tmovl\t$0, %%eax\n"
-                                                "\tcall\t%s\n"
-                                                "\tmovl\t%%eax, _%s(%%rip)\n", tac->op1->text, tac->res->text);
+                case TAC_FUNCALL:{
+                        HASH_NODE* func = hashFind(tac->op1->text);
+                        funcallDatatype = func->datatype;
+
+                        fprintf(fout, "## TAC_FUNCALL\n"
+                                        "\tmovl\t$0, %%eax\n"
+                                        "\tcall\t%s\n", tac->op1->text);
+                        if(funcallDatatype == DATATYPE_FLOAT){
+                                fprintf(fout, "\tmovss\t%%xmm0, _%s(%%rip)\n", tac->res->text);
+                        }
+                        else{
+                                fprintf(fout, "\tmovl\t%%eax, _%s(%%rip)\n", tac->res->text);
+                        }
+                }
                         break;
                 case TAC_ARG:{
                         AST* fundecl = findFunctionDeclaration(getRootAST(), tac->op1->text);
@@ -687,8 +703,46 @@ void generateASM(TAC* tac, FILE* fout){
                                         "\tmovl\t%%eax, _%s(%%rip)\n", tac->res->text, param->text);
                 }
                         break;
-                case TAC_RETURN: fprintf(fout, "## TAC_RETURN\n"
-                                                "\tmovl\t_%s(%%rip), %%eax\n", tac->res->text);
+                case TAC_RETURN:{
+                        fprintf(fout, "## TAC_RETURN\n");
+                        if(funcallDatatype == DATATYPE_FLOAT){
+                                if(tac->res->type == SYMBOL_LITCHAR){
+                                        int counter = findCounter(tac->res->text);
+                                        fprintf(fout, "\tmovl\t_%s%d(%%rip), %%eax\n"
+                                                        "\tcvtsi2ss\t%%eax, %%xmm0\n", LITCHAR_VAR_NAME, counter);
+                                }
+                                else if(tac->res->type == SYMBOL_LITREAL){
+                                        int counter = findCounter(tac->res->text);
+                                        fprintf(fout, "\tmovss\t_%s%d(%%rip), %%xmm0\n", LITFLOAT_VAR_NAME, counter);
+                                }
+                                else if(tac->res->datatype == DATATYPE_FLOAT){
+                                        fprintf(fout, "\tmovss\t_%s(%%rip), %%xmm0\n", tac->res->text);
+                                }
+                                else{
+                                        fprintf(fout, "\tmovl\t_%s(%%rip), %%eax\n"
+                                                        "\tcvtsi2ss\t%%eax, %%xmm0\n", tac->res->text);
+                                }
+                        }
+                        else{
+                                if(tac->res->type == SYMBOL_LITCHAR){
+                                        int counter = findCounter(tac->res->text);
+                                        fprintf(fout, "\tmovl\t_%s%d(%%rip), %%eax\n", LITCHAR_VAR_NAME, counter);
+                                }
+                                else if(tac->res->type == SYMBOL_LITREAL){
+                                        int counter = findCounter(tac->res->text);
+                                        fprintf(fout, "\tmovss\t_%s%d(%%rip), %%xmm0\n"
+                                                        "\tcvttss2si\t%%xmm0, %%eax\n", LITFLOAT_VAR_NAME, counter);
+                                }
+                                else if(tac->res->datatype == DATATYPE_FLOAT){
+                                        fprintf(fout, "\tmovss\t_%s(%%rip), %%xmm0\n"
+                                                        "\tcvttss2si\t%%xmm0, %%eax\n", tac->res->text);
+                                }
+                                else{
+                                        fprintf(fout, "\tmovl\t_%s(%%rip), %%eax\n", tac->res->text);
+                                }
+                        }
+
+                }
                         break;
                 case TAC_BREAK: if(tac->res != 0){
                         fprintf(fout, "## TAC_BREAK\n"
