@@ -506,7 +506,10 @@ void generateASM(TAC* tac, FILE* fout){
                         break;
                 case TAC_MOVE:{
                         fprintf(fout, "## TAC_MOVE\n");
-                        if(tac->op1->type == SYMBOL_LITCHAR){ // case var = litchar;
+                        if(forBeginFlag == 1 && tac->op1->type == SYMBOL_SCALAR && strcmp(tac->op1->text, forVariable->text) == 0){
+                                fprintf(fout, "\tmovl\t$%d, _%s(%%rip)\n", forCurrIndex, tac->res->text);
+                        }
+                        else if(tac->op1->type == SYMBOL_LITCHAR){ // case var = litchar;
                                 int counter = findCounter(tac->op1->text);
                                 if(tac->res->datatype == DATATYPE_FLOAT){ // case floatVar = litchar;
                                         fprintf(fout, "\tmovl\t_%s%d(%%rip), %%eax\n"
@@ -749,7 +752,10 @@ void generateASM(TAC* tac, FILE* fout){
                         HASH_NODE* param = findParam(fundecl->son[1], 1, atoi(tac->op2->text));
 
                         fprintf(fout, "## TAC_ARG\n");
-                        if(param->datatype == DATATYPE_FLOAT){
+                        if(forBeginFlag == 1 && tac->res->type == SYMBOL_SCALAR && strcmp(tac->res->text, forVariable->text) == 0){
+                                fprintf(fout, "\tmovl\t$%d, _%s(%%rip)\n", forCurrIndex, param->text);
+                        }
+                        else if(param->datatype == DATATYPE_FLOAT){
                                 if(tac->res->type == SYMBOL_LITREAL){
                                         int counter = findCounter(tac->res->text);
                                         fprintf(fout, "\tmovss\t_%s%d(%%rip), %%xmm0\n"
@@ -998,12 +1004,12 @@ void generateASM(TAC* tac, FILE* fout){
 
                         tacForBeginFound = 0;
 
+                        fprintf(fout, "\tmovl\t$%d, _%s(%%rip)\n", forCurrIndex, forVariable->text);
+
                         if(forCurrIndex < forLimitValue)
                                 generateASM(tac, fout);
                         else{
-                                fprintf(fout, "## ACABOU O FOR, MOVER VALOR FINAL PARA VARIAVEL!\n"
-                                                "\tmovl\t$%d, %%eax\n"
-                                                "\tmovl\t%%eax, _%s(%%rip)\n", forCurrIndex, forVariable->text);
+                                fprintf(fout, "## ACABOU O FOR!\n");
 
                                 forVariable = 0;
                                 forInitValue = 0;
