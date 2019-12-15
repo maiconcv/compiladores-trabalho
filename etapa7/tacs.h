@@ -37,6 +37,9 @@
 #define TAC_FUNCALL 29
 #define TAC_ARG 30
 #define TAC_BREAK 31
+#define TAC_FORINIT 32
+#define TAC_FORBEGIN 33
+#define TAC_FOREND 34
 
 #define LABEL_LOGIC_OP "LB"
 

@@ -9,6 +9,14 @@ int vectorSizeFlag = 0;
 int vectorDatatype = 0;
 int funcallDatatype = 0;
 
+HASH_NODE* forVariable = 0;
+int forInitValue = 0;
+int forLimitValue = 0;
+int forIncValue = 0;
+int forBeginFlag = 0;
+int forCurrIndex = 0;
+int tacForBeginFound = 0;
+
 AST* getRootAST();
 
 // INTERNAL PROTOTYPES
@@ -73,6 +81,9 @@ void tacPrintSingle(TAC* tac){
                 case TAC_FUNCALL: fprintf(stderr, "TAC_FUNCALL"); break;
                 case TAC_ARG: fprintf(stderr, "TAC_ARG"); break;
                 case TAC_BREAK: fprintf(stderr, "TAC_BREAK"); break;
+                case TAC_FORINIT: fprintf(stderr, "TAC_FORINIT"); break;
+                case TAC_FORBEGIN: fprintf(stderr, "TAC_FORBEGIN"); break;
+                case TAC_FOREND: fprintf(stderr, "TAC_FOREND"); break;
                 default: fprintf(stderr, "UNKNOWN"); break;
         }
 
@@ -280,7 +291,13 @@ TAC* makeWhile(TAC* code0, TAC* code1, HASH_NODE* labelLeaveWhile){
 }
 
 TAC* makeFor(HASH_NODE* var, TAC* code0, TAC* code1, TAC* code2, TAC* code3, HASH_NODE* labelLeaveFor){
-        HASH_NODE* labelBeforeFor = makeLabel();
+        TAC* tacForInit = tacCreate(TAC_FORINIT, var, code0->res, code1->res);
+        TAC* tacForBegin = tacCreate(TAC_FORBEGIN, code2->res, 0, 0);
+        TAC* tacForEnd = tacCreate(TAC_FOREND, 0, 0, 0);
+
+        return tacJoin(tacJoin(tacJoin(tacForInit, tacForBegin), code3), tacForEnd);
+
+        /*HASH_NODE* labelBeforeFor = makeLabel();
         //HASH_NODE* labelLeaveFor = makeLabel();
         HASH_NODE* compareResult = makeTemp();
         HASH_NODE* incResult = makeTemp();
@@ -303,7 +320,7 @@ TAC* makeFor(HASH_NODE* var, TAC* code0, TAC* code1, TAC* code2, TAC* code3, HAS
         TAC* tacLabelLeaveFor = tacCreate(TAC_LABEL, labelLeaveFor, 0, 0);
 
         return tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(code0, tacMoveInitValue), tacLabelBeforeFor), code1), tacCompare), tacIf), code3), code2), tacInc), tacMoveInc), tacJump), tacLabelLeaveFor);
-}
+*/}
 
 void tacPrintForwards(TAC* tac){
         if(!tac) return;
@@ -320,6 +337,28 @@ void generateASM(TAC* tac, FILE* fout){
 
         if(tac->prev)
                 generateASM(tac->prev, fout);
+
+        if(forBeginFlag == 0)
+                fprintf(stderr, "for nao iniciado, entrar no switch! %d\n", tac->type);
+        else if(forCurrIndex == -1){
+                if(tac->type == TAC_FOREND)
+                        fprintf(stderr, "primeiro for end, entra pra colocar indice em 0! %d\n", tac->type);
+                else{
+                        fprintf(stderr, "nao chegou primeiro for end, pulando! %d\n", tac->type);
+                        return;
+                }
+        }
+        else if(tac->type == TAC_FORBEGIN){
+                fprintf(stderr, "segundo for begin, pular pra nao resetar! %d\n", tac->type);
+                tacForBeginFound = 1;
+                return;
+        }
+        else if(tacForBeginFound == 1)
+                fprintf(stderr, "encontrei for begin, comandos dentro do for, entrando! %d\n", tac->type);
+        else{
+                fprintf(stderr, "comandos fora do for, pulando! %d\n", tac->type);
+                return;
+        }
 
         switch (tac->type) {
                 case TAC_VARDECL:{
@@ -370,6 +409,13 @@ void generateASM(TAC* tac, FILE* fout){
                         functionCounter++;
                         break;
                 case TAC_PRINT:
+                        if(forBeginFlag && tac->res->type == SYMBOL_SCALAR){
+                                fprintf(fout, "## TAC_PRINT_VAR\n"
+                                                "\tmovl\t$%d, %%esi\n"
+                                                "\tleaq\tLC0(%%rip), %%rdi\n"
+                                                "\tcall\tprintf@PLT\n", forCurrIndex);
+                        }
+                        else{
                         switch (tac->res->type) {
                                 case SYMBOL_LITSTRING:{
                                         int counter = findCounter(tac->res->text);
@@ -455,6 +501,7 @@ void generateASM(TAC* tac, FILE* fout){
                                         }
                                 }
                                         break;
+                        }
                         }
                         break;
                 case TAC_MOVE:{
@@ -833,7 +880,18 @@ void generateASM(TAC* tac, FILE* fout){
                                 vectorSizeFlag--;
                         }
                         break;
-                case TAC_VECTREAD: fprintf(fout, "## TAC_VECTREAD\n"
+                case TAC_VECTREAD:
+                        if(forBeginFlag == 1){
+                                fprintf(fout, "## TAC_VECTREAD\n"
+                                                "\tmovl\t$%d, %%eax\n"
+                                                "\tcltq\n"
+                                                "\tleaq\t0(,%%rax,4), %%rdx\n"
+                                                "\tleaq\t_%s(%%rip), %%rax\n"
+                                        	"\tmovl\t(%%rdx,%%rax), %%eax\n"
+                                        	"\tmovl\t%%eax, _%s(%%rip)\n", forCurrIndex, tac->op1->text, tac->res->text);
+                        }
+                        else
+                                fprintf(fout, "## TAC_VECTREAD\n"
                                                 "\tmovl\t_%s(%%rip), %%eax\n"
                                         	"\tcltq\n"
                                         	"\tleaq\t0(,%%rax,4), %%rdx\n"
@@ -845,7 +903,10 @@ void generateASM(TAC* tac, FILE* fout){
                         fprintf(fout, "## TAC_MOVEVECT\n");
 
                         // index
-                        if(tac->op1->type == SYMBOL_LITREAL){
+                        if(forBeginFlag){
+                                fprintf(fout, "\tmovl\t$%d, %%eax\n", forCurrIndex);
+                        }
+                        else if(tac->op1->type == SYMBOL_LITREAL){
                                 int counter = findCounter(tac->op1->text);
                                 fprintf(fout, "\tmovss\t_%s%d(%%rip), %%xmm0\n"
                                                 "\tcvttss2si\t%%xmm0, %%eax\n", LITFLOAT_VAR_NAME, counter);
@@ -863,7 +924,14 @@ void generateASM(TAC* tac, FILE* fout){
                         }
 
                         // value
-                        if(tac->res->datatype == DATATYPE_FLOAT){
+                        if(forBeginFlag == 1){
+                                fprintf(fout, "\tmovl\t$%d, %%edx\n"
+                                                "\tcltq\n"
+                                                "\tleaq\t0(,%%rax,4), %%rcx\n"
+                                                "\tleaq\t_%s(%%rip), %%rax\n"
+                                                "\tmovl\t%%edx, (%%rcx,%%rax)\n", forCurrIndex, tac->res->text);
+                        }
+                        else if(tac->res->datatype == DATATYPE_FLOAT){
                                 if(tac->op2->type == SYMBOL_LITREAL){
                                         int counter = findCounter(tac->op2->text);
                                         fprintf(fout, "\tmovss\t_%s%d(%%rip), %%xmm1\n", LITFLOAT_VAR_NAME, counter);
@@ -910,6 +978,41 @@ void generateASM(TAC* tac, FILE* fout){
                                                 "\tmovl\t%%edx, (%%rcx,%%rax)\n", tac->res->text);
                         }
                 }
+                        break;
+                case TAC_FORINIT:
+                        forVariable = tac->res;
+                        forInitValue = atoi(tac->op1->text);
+                        forLimitValue = atoi(tac->op2->text);
+                        break;
+                case TAC_FORBEGIN:
+                        forIncValue = atoi(tac->res->text);
+                        forBeginFlag = 1;
+                        forCurrIndex = -1;
+                        tacForBeginFound = 1;
+                        break;
+                case TAC_FOREND:
+                        if(forCurrIndex != -1)
+                                forCurrIndex += forIncValue;
+                        else
+                                forCurrIndex = forInitValue;
+
+                        tacForBeginFound = 0;
+
+                        if(forCurrIndex < forLimitValue)
+                                generateASM(tac, fout);
+                        else{
+                                fprintf(fout, "## ACABOU O FOR, MOVER VALOR FINAL PARA VARIAVEL!\n"
+                                                "\tmovl\t$%d, %%eax\n"
+                                                "\tmovl\t%%eax, _%s(%%rip)\n", forCurrIndex, forVariable->text);
+
+                                forVariable = 0;
+                                forInitValue = 0;
+                                forLimitValue = 0;
+                                forIncValue = 0;
+                                forBeginFlag = 0;
+                                forCurrIndex = 0;
+                                tacForBeginFound = 0;
+                        }
                         break;
                 default:
                         break;
