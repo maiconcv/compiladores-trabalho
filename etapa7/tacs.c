@@ -409,7 +409,7 @@ void generateASM(TAC* tac, FILE* fout){
                         functionCounter++;
                         break;
                 case TAC_PRINT:
-                        if(forBeginFlag && tac->res->type == SYMBOL_SCALAR){
+                        if(forBeginFlag && tac->res->type == SYMBOL_SCALAR && strcmp(tac->res->text, forVariable->text) == 0){
                                 fprintf(fout, "## TAC_PRINT_VAR\n"
                                                 "\tmovl\t$%d, %%esi\n"
                                                 "\tleaq\tLC0(%%rip), %%rdi\n"
@@ -881,7 +881,7 @@ void generateASM(TAC* tac, FILE* fout){
                         }
                         break;
                 case TAC_VECTREAD:
-                        if(forBeginFlag == 1){
+                        if(forBeginFlag == 1 && strcmp(tac->op2->text, forVariable->text) == 0){
                                 fprintf(fout, "## TAC_VECTREAD\n"
                                                 "\tmovl\t$%d, %%eax\n"
                                                 "\tcltq\n"
@@ -903,7 +903,7 @@ void generateASM(TAC* tac, FILE* fout){
                         fprintf(fout, "## TAC_MOVEVECT\n");
 
                         // index
-                        if(forBeginFlag){
+                        if(forBeginFlag && strcmp(tac->op1->text, forVariable->text) == 0){
                                 fprintf(fout, "\tmovl\t$%d, %%eax\n", forCurrIndex);
                         }
                         else if(tac->op1->type == SYMBOL_LITREAL){
@@ -924,7 +924,7 @@ void generateASM(TAC* tac, FILE* fout){
                         }
 
                         // value
-                        if(forBeginFlag == 1){
+                        if(forBeginFlag == 1 && strcmp(tac->op2->text, forVariable->text) == 0){
                                 fprintf(fout, "\tmovl\t$%d, %%edx\n"
                                                 "\tcltq\n"
                                                 "\tleaq\t0(,%%rax,4), %%rcx\n"
