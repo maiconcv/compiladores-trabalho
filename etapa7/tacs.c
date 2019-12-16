@@ -335,28 +335,33 @@ void generateASM(TAC* tac, FILE* fout){
 
         if(!tac) return;
 
+        if(forBeginFlag == 1 && tac->type == TAC_FORINIT){
+                goto JUMP_RECURSION;
+        }
+
         if(tac->prev)
                 generateASM(tac->prev, fout);
 
-        if(forBeginFlag == 0)
-                fprintf(stderr, "for nao iniciado, entrar no switch! %d\n", tac->type);
+        JUMP_RECURSION:
+        if(forBeginFlag == 0);
+                //fprintf(stderr, "for nao iniciado, entrar no switch! %d\n", tac->type);
         else if(forCurrIndex == -1){
-                if(tac->type == TAC_FOREND)
-                        fprintf(stderr, "primeiro for end, entra pra colocar indice em 0! %d\n", tac->type);
+                if(tac->type == TAC_FOREND);
+                        //fprintf(stderr, "primeiro for end, entra pra colocar indice em 0! %d\n", tac->type);
                 else{
-                        fprintf(stderr, "nao chegou primeiro for end, pulando! %d\n", tac->type);
+                        //fprintf(stderr, "nao chegou primeiro for end, pulando! %d\n", tac->type);
                         return;
                 }
         }
         else if(tac->type == TAC_FORBEGIN){
-                fprintf(stderr, "segundo for begin, pular pra nao resetar! %d\n", tac->type);
+                //fprintf(stderr, "segundo for begin, pular pra nao resetar! %d\n", tac->type);
                 tacForBeginFound = 1;
                 return;
         }
-        else if(tacForBeginFound == 1)
-                fprintf(stderr, "encontrei for begin, comandos dentro do for, entrando! %d\n", tac->type);
+        else if(tacForBeginFound == 1);
+                //fprintf(stderr, "encontrei for begin, comandos dentro do for, entrando! %d\n", tac->type);
         else{
-                fprintf(stderr, "comandos fora do for, pulando! %d\n", tac->type);
+                //fprintf(stderr, "comandos fora do for, pulando! %d\n", tac->type);
                 return;
         }
 
@@ -895,7 +900,7 @@ void generateASM(TAC* tac, FILE* fout){
                         }
                         else{
                                 fprintf(fout, "\n\t.data\n"
-                                                "\t.comm\t%s,%s\n", tac->res->text, tac->op1->text);
+                                                "\t.comm\t_%s,%s\n", tac->res->text, tac->op1->text);
                         }
                 }
                         break;
