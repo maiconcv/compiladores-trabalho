@@ -818,7 +818,7 @@ void generateASM(TAC* tac, FILE* fout){
                         }
                         else{
                                 fprintf(fout, "\n\t.data\n"
-                                                "\t.comm\t%s,%s\n", tac->res->text, tac->op1->text);
+                                                "\t.comm\t_%s,%s\n", tac->res->text, tac->op1->text);
                         }
                 }
                         break;
