@@ -602,16 +602,40 @@ void generateASM(TAC* tac, FILE* fout){
                 	               "\tmovss\t%%xmm0, _%s(%%rip)\n", tac->res->text);
                 }
                         break;
-                case TAC_IFZ: fprintf(fout, "## TAC_IFZ\n"
+                case TAC_IFZ:
+                        if(forBeginFlag == 1){
+                                fprintf(fout, "## TAC_IFZ\n"
+                                                "\tmovl\t_%s(%%rip), %%eax\n"
+                                                "\ttestl\t%%eax, %%eax\n"
+                                                "\tje\t.%s_%d\n", tac->op1->text, tac->res->text, logicOpLabelCounter);
+                        }
+                        else{
+                                fprintf(fout, "## TAC_IFZ\n"
                                                 "\tmovl\t_%s(%%rip), %%eax\n"
                                                 "\ttestl\t%%eax, %%eax\n"
                                                 "\tje\t.%s\n", tac->op1->text, tac->res->text);
+                        }
                         break;
-                case TAC_LABEL: fprintf(fout, "## TAC_LABEL\n"
+                case TAC_LABEL:
+                        if(forBeginFlag == 1){
+                                fprintf(fout, "## TAC_LABEL\n"
+                                                ".%s_%d:\n", tac->res->text, logicOpLabelCounter);
+                                logicOpLabelCounter++;
+                        }
+                        else{
+                                fprintf(fout, "## TAC_LABEL\n"
                                                 ".%s:\n", tac->res->text);
+                        }
                         break;
-                case TAC_JUMP: fprintf(fout, "## TAC_JUMP\n"
+                case TAC_JUMP:
+                        if(forBeginFlag == 1){
+                                fprintf(fout, "## TAC_JUMP\n"
+                                                "\tjmp\t.%s_%d\n", tac->res->text, logicOpLabelCounter+1);
+                        }
+                        else{
+                                fprintf(fout, "## TAC_JUMP\n"
                                                 "\tjmp\t.%s\n", tac->res->text);
+                        }
                         break;
                 case TAC_EQ:{
                         OPERANDS op = fillOperands(tac->op1, tac->op2);
@@ -1066,6 +1090,24 @@ OPERANDS fillOperands(HASH_NODE* op1, HASH_NODE* op2){
 }
 
 void loadVarsIntoCorrectRegisters(FILE* fout, HASH_NODE* op1, HASH_NODE* op2, OPERANDS op){
+        int op1Done = 0, op2Done = 0;
+
+        if(forBeginFlag == 1 && op1->type == SYMBOL_SCALAR && strcmp(op1->text, forVariable->text) == 0){
+                fprintf(fout, "\tmovl\t$%d, %%eax\n"
+                                "\tcvtsi2ss\t%%eax, %%xmm0\n", forCurrIndex);
+                op1Done = 1;
+        }
+        if(forBeginFlag == 1 && op2->type == SYMBOL_SCALAR && strcmp(op2->text, forVariable->text) == 0){
+                fprintf(fout, "\tmovl\t$%d, %%edx\n"
+                                "\tcvtsi2ss\t%%edx, %%xmm1\n", forCurrIndex);
+                op2Done = 1;
+        }
+
+        if(op1Done == 1 && op2Done == 1)
+                return;
+        else if(op1Done == 1)
+                goto OP1DONE;
+
         if(op1->type == SYMBOL_LITREAL ||
            ((op1->type == SYMBOL_SCALAR || op1->type == SYMBOL_TEMP) && op1->datatype == DATATYPE_FLOAT)){
                 fprintf(fout, "\tmovss\t_%s(%%rip), %%xmm0\n", op.op1);
@@ -1075,6 +1117,10 @@ void loadVarsIntoCorrectRegisters(FILE* fout, HASH_NODE* op1, HASH_NODE* op2, OP
                                 "\tcvtsi2ss\t%%eax, %%xmm0\n", op.op1);
         }
 
+        if(op2Done == 1)
+                return;
+
+        OP1DONE:
         if(op2->type == SYMBOL_LITREAL ||
            ((op2->type == SYMBOL_SCALAR || op2->type == SYMBOL_TEMP) && op2->datatype == DATATYPE_FLOAT)){
                 fprintf(fout, "\tmovss\t_%s(%%rip), %%xmm1\n", op.op2);
