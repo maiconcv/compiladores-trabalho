@@ -1,0 +1,14 @@
+int x = 0;
+int y = 0;
+int vect[1000];
+
+int main(){
+        for(x:0, 1000, 1){
+                vect[x] = x;
+        };
+
+        for(x:0, 1000, 1){
+                print vect[x] " ";
+        };
+        print "\n";
+}
