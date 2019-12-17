@@ -1,0 +1,58 @@
+int x = 0;
+bool b = FALSE;
+byte vch[5]: 'A' 'B' 'C' 'D' 'E';
+float vf[5]: 1.1 2.2 3.3 4.4 5.5;
+float f1 = 100.5;
+
+int main(){
+        x = printVCH();
+        for(x:0, 5, 1){
+                vch[x] = vch[x] + 5.9;
+        };
+        x = printVCH();
+        print "\n";
+
+        x = printVF();
+        for(x:0, 5, 1){
+                vf[x] = vf[x] * 2.5;
+        };
+        x = printVF();
+        print "\n";
+
+        read f1;
+        print "Valor digitado = " f1 "\n";
+        
+        f1 = f1 / 3.7;
+        print "f1 = " f1 "\n";
+        print "\n";
+
+        f1 = 100.9 * 3.1 - ('d' + 101.1);
+        print "f1 = " f1 "\n";
+
+        if(f1 == 111.6) then
+                print "THEN: " f1 " igual a 111.6\n"
+        else
+                print "ELSE: " f1 " diferente de 111.6\n";
+
+        if(f1 > 111.6) then
+                print "THEN: " f1 " maior que a 111.6\n"
+        else
+                print "ELSE: " f1 " menor que 111.6\n";
+        
+        b = f1 == 111.690002;
+        print "f1 igual a  111.690002 ? " b "\n";
+}
+
+int printVCH(){
+        for(x:0, 5, 1)
+                print vch[x] " ";
+        print "\n";
+        return 0;
+}
+
+int printVF(){
+        for(x:0, 5, 1)
+                print vf[x] " ";
+        print "\n";
+        return 0;
+}
