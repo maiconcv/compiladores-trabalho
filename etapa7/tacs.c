@@ -291,11 +291,12 @@ TAC* makeWhile(TAC* code0, TAC* code1, HASH_NODE* labelLeaveWhile){
 }
 
 TAC* makeFor(HASH_NODE* var, TAC* code0, TAC* code1, TAC* code2, TAC* code3, HASH_NODE* labelLeaveFor){
+        TAC* tacLabelLeaveFor = tacCreate(TAC_LABEL, labelLeaveFor, 0, 0);
         TAC* tacForInit = tacCreate(TAC_FORINIT, var, code0->res, code1->res);
         TAC* tacForBegin = tacCreate(TAC_FORBEGIN, code2->res, 0, 0);
         TAC* tacForEnd = tacCreate(TAC_FOREND, 0, 0, 0);
 
-        return tacJoin(tacJoin(tacJoin(tacForInit, tacForBegin), code3), tacForEnd);
+        return tacJoin(tacJoin(tacJoin(tacJoin(tacForInit, tacForBegin), code3), tacForEnd), tacLabelLeaveFor);
 }
 
 void tacPrintForwards(TAC* tac){
